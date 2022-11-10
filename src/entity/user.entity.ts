@@ -7,11 +7,13 @@ import {
 } from 'typeorm';
 
 @Entity({ name: 'user' })
+@Unique(['email'])
+@Unique(['login_id'])
 export class User extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ unique: true })
+  @Column()
   email: string;
 
   @Column({ nullable: true })
@@ -20,7 +22,7 @@ export class User extends BaseEntity {
   @Column({ length: 20 })
   name: string;
 
-  @Column({ length: 15, unique: true })
+  @Column({ length: 15 })
   login_id: string;
 
   @Column({ nullable: true })

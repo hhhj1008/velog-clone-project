@@ -9,10 +9,6 @@ export class UserRepository extends Repository<User> {
     return await this.findOne({ email });
   }
 
-  async checkLoginId(login_id: string) {
-    return await this.findOne({ login_id: login_id });
-  }
-
   async signupWithEmail(createUserDto: CreateUserDto, hashedPassword: string) {
     Logger.log('Signup with email Repository Start');
     const { email, name, about_me, login_id } = createUserDto;
