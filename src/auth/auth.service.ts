@@ -1,14 +1,19 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { MailerService } from '@nestjs-modules/mailer';
 import { CreateUserDto } from 'src/dto/user/create-user.dto';
 import { UserRepository } from 'src/repository/user.repository';
 import * as bcryptjs from 'bcryptjs';
+import { LoginDto } from 'src/dto/user/login.dto';
+import { JwtService } from '@nestjs/jwt';
+import { User } from 'src/entity/user.entity';
+import { IPayload } from './context/types';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly mailerService: MailerService,
     private readonly userRepository: UserRepository,
+    private readonly jwtService: JwtService,
   ) {}
 
   async sendEmail(email: string) {
@@ -40,5 +45,24 @@ export class AuthService {
     const hashedPassword = bcryptjs.hashSync(password, salt);
 
     await this.userRepository.signupWithEmail(createUserDto, hashedPassword);
+  }
+
+  async validateUser(login_id: string, password: string) {
+    const user = await this.userRepository.checkEmail(login_id);
+
+    if (user && bcryptjs.compareSync(password, user.password)) {
+      const { password, ...result } = user;
+      return result;
+    }
+    return null;
+  }
+
+  async login(user: any) {
+    const payload: IPayload = {
+      sub: user.id,
+      login_id: user.login_id,
+      name: user.name,
+    };
+    return this.jwtService.sign({ user: payload });
   }
 }

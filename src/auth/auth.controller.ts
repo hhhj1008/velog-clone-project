@@ -7,11 +7,16 @@ import {
   InternalServerErrorException,
   Post,
   Query,
+  UseGuards,
   UsePipes,
   ValidationPipe,
+  Request,
+  Get,
 } from '@nestjs/common';
 import { CreateUserDto } from 'src/dto/user/create-user.dto';
 import { AuthService } from './auth.service';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { LocalAuthGuard } from './guards/local-auth.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -25,7 +30,7 @@ export class AuthController {
       throw new ConflictException('이미 가입된 이메일입니다.');
     }
     const code = await this.authService.sendEmail(email);
-    return Object.assign({ message: 'Send Email', signup_code: code });
+    return { message: 'Send Email', signup_code: code };
   }
 
   @Post('/signup')
@@ -60,5 +65,19 @@ export class AuthController {
       }
       throw new InternalServerErrorException();
     }
+  }
+
+  @UseGuards(LocalAuthGuard)
+  @Post('/login')
+  @HttpCode(201)
+  async login(@Request() req) {
+    const token = await this.authService.login(req.user);
+    return { message: 'login success', token };
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('/test')
+  getUserInfo(@Request() req) {
+    return { message: 'success', user: req.user };
   }
 }
