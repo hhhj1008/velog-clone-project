@@ -15,7 +15,6 @@ import {
 } from '@nestjs/common';
 import { CreateUserDto } from 'src/dto/user/create-user.dto';
 import { AuthService } from './auth.service';
-import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 
 @Controller('auth')
@@ -73,11 +72,5 @@ export class AuthController {
   async login(@Request() req) {
     const token = await this.authService.login(req.user);
     return { message: 'login success', token };
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @Get('/test')
-  getUserInfo(@Request() req) {
-    return { message: 'success', user: req.user };
   }
 }

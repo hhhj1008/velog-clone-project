@@ -1,11 +1,9 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { MailerService } from '@nestjs-modules/mailer';
 import { CreateUserDto } from 'src/dto/user/create-user.dto';
 import { UserRepository } from 'src/repository/user.repository';
 import * as bcryptjs from 'bcryptjs';
-import { LoginDto } from 'src/dto/user/login.dto';
 import { JwtService } from '@nestjs/jwt';
-import { User } from 'src/entity/user.entity';
 import { IPayload } from './context/types';
 
 @Injectable()
