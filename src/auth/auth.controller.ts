@@ -4,7 +4,7 @@ import {
   ConflictException,
   Controller,
   HttpCode,
-  Logger,
+  InternalServerErrorException,
   Post,
   Query,
   UsePipes,
@@ -35,25 +35,30 @@ export class AuthController {
     @Query('type') type: string,
     @Body() createUserDto: CreateUserDto,
   ) {
-    switch (type) {
-      case 'email':
-        Logger.log('Signup with Email Controller Start');
-        await this.authService.signupWithEmail(createUserDto);
-        Logger.log('Signup with Email Controller End');
-
-      case 'github':
-        return Object.assign({ message: 'github signup' });
-
-      case 'google':
-        return Object.assign({ message: 'google signup' });
-
-      case 'facebook':
-        return Object.assign({ message: 'facebook signup' });
-
-      default:
-        throw new BadRequestException(
-          'Type must to be `email` or `github` or `google` or `facebook`',
-        );
+    try {
+      switch (type) {
+        case 'email':
+          await this.authService.signupWithEmail(createUserDto);
+          break;
+        case 'github':
+          return Object.assign({ message: 'github signup' });
+        // break;
+        case 'google':
+          return Object.assign({ message: 'google signup' });
+        // break;
+        case 'facebook':
+          return Object.assign({ message: 'facebook signup' });
+        // break;
+        default:
+          throw new BadRequestException(
+            'Type must to be `email` or `github` or `google` or `facebook`',
+          );
+      }
+    } catch (err) {
+      if (err.code === 'ER_DUP_ENTRY') {
+        throw new ConflictException('이메일이 중복 되었습니다');
+      }
+      throw new InternalServerErrorException();
     }
   }
 }

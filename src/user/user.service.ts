@@ -1,4 +1,4 @@
-import { ConflictException, Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { UserRepository } from 'src/repository/user.repository';
 import { Connection } from 'typeorm';
 

@@ -1,17 +1,4 @@
-import {
-  BadRequestException,
-  Body,
-  Controller,
-  Get,
-  HttpCode,
-  Logger,
-  Post,
-  Query,
-  Redirect,
-  UsePipes,
-  ValidationPipe,
-} from '@nestjs/common';
-import { CreateUserDto } from 'src/dto/user/create-user.dto';
+import { Controller } from '@nestjs/common';
 import { UserService } from './user.service';
 
 @Controller('users')
