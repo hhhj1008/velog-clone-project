@@ -53,6 +53,7 @@ export class AuthService {
     }
 
     if (bcryptjs.compareSync(password, user.password)) {
+
       const { password, ...result } = user;
       return result;
     }

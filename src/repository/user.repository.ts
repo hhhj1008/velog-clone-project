@@ -5,6 +5,7 @@ import { EntityRepository, Repository } from 'typeorm';
 
 @EntityRepository(User)
 export class UserRepository extends Repository<User> {
+
   async checkEmail(email: string) {
     const user = await this.findOne({ email });
     return user;
