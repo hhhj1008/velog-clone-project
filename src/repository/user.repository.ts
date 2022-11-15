@@ -1,11 +1,11 @@
 import { ForbiddenException } from '@nestjs/common';
 import { CreateUserDto } from 'src/dto/user/create-user.dto';
+import { UpdateUserDto } from 'src/dto/user/update-user.dto';
 import { User } from 'src/entity/user.entity';
 import { EntityRepository, Repository } from 'typeorm';
 
 @EntityRepository(User)
 export class UserRepository extends Repository<User> {
-
   async checkEmail(email: string) {
     const user = await this.findOne({ email });
     return user;
@@ -30,5 +30,9 @@ export class UserRepository extends Repository<User> {
       about_me,
     });
     await this.save(user);
+  }
+
+  async updateUser(id: number, updateUserDto: UpdateUserDto) {
+    // const
   }
 }

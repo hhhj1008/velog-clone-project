@@ -1,5 +1,10 @@
 import { PartialType, PickType } from '@nestjs/mapped-types';
 import { Allow, IsBoolean, IsEmail, IsUrl } from 'class-validator';
+import {
+  IsBooleanOrNull,
+  IsEmailOrNUll,
+  IsUrlOrNull,
+} from 'src/validations/user.validation';
 import { CreateUserDto } from './create-user.dto';
 
 /**
@@ -14,7 +19,7 @@ export class UpdateUserDto extends PartialType(
   @Allow()
   title?: string;
 
-  @IsEmail()
+  @IsEmailOrNUll({ message: 'social_info_email must be a Email or Null' })
   social_info_email?: string;
 
   @Allow()
@@ -26,12 +31,12 @@ export class UpdateUserDto extends PartialType(
   @Allow()
   social_info_facebook?: string;
 
-  @IsUrl()
+  @IsUrlOrNull({ message: 'social_info_url must be a Url or Null' })
   social_info_url?: string;
 
-  @IsBoolean()
+  @IsBooleanOrNull({ message: 'comment_alert must be a Boolean or Null' })
   comment_alert?: boolean;
 
-  @IsBoolean()
+  @IsBooleanOrNull({ message: 'update_alert must be a Boolean or Null' })
   update_alert?: boolean;
 }
