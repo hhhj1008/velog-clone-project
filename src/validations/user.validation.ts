@@ -21,7 +21,7 @@ export class IsEmailOrNullConstraint implements ValidatorConstraintInterface {
   }
 }
 
-export function IsEmailOrNUll(validationOptions?: ValidationOptions) {
+export function IsEmailOrNull(validationOptions?: ValidationOptions) {
   return function (object: any, propertyName: string) {
     registerDecorator({
       target: object.constructor,
@@ -40,7 +40,7 @@ export class IsUrlOrNullConstraint implements ValidatorConstraintInterface {
 
   validate(social_info_url: string) {
     const urlReg: RegExp =
-      /(http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/;
+      /[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,4}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/;
     if (!social_info_url || urlReg.test(social_info_url)) {
       return true;
     }
@@ -65,8 +65,8 @@ export function IsUrlOrNull(validationOptions?: ValidationOptions) {
 export class IsBooleanOrNullConstraint implements ValidatorConstraintInterface {
   constructor() {}
 
-  validate(alert: boolean) {
-    if (typeof alert == 'boolean' || alert === undefined) {
+  validate(alert: number) {
+    if (alert === 1 || alert === 0 || alert === undefined) {
       return true;
     } else {
       return false;

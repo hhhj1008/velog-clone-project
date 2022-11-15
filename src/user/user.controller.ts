@@ -24,8 +24,8 @@ export class UserController {
     @Body() updateUserDto: UpdateUserDto,
     @Request() req: Request,
   ) {
-    const { id, name, login_id } = req['user'];
-    console.log(updateUserDto);
-    // const data = await this.userService.updateUser(id, updateUserDto);
+    const { id } = req['user'];
+    const data = await this.userService.updateUser(id, updateUserDto);
+    return { message: 'update user success', data: data };
   }
 }
