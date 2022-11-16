@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { SocialInfoDto, UpdateUserDto } from 'src/dto/user/update-user.dto';
+import { SocialInfoDto } from 'src/dto/user/update-user.dto';
 import { SocialInfoRepository } from 'src/repository/social-info.repository';
 import { UserRepository } from 'src/repository/user.repository';
 import { Connection } from 'typeorm';
@@ -18,26 +18,22 @@ export class UserService {
     return this.userRepository.findByLogin(login_id);
   }
 
-  async updateUser(id: number, updateUserDto: UpdateUserDto) {
-    const {
-      social_info_email,
-      social_info_github,
-      social_info_twitter,
-      social_info_facebook,
-      social_info_url,
-    } = updateUserDto;
-    const socialInfoDto: SocialInfoDto = {
-      social_info_email,
-      social_info_github,
-      social_info_twitter,
-      social_info_facebook,
-      social_info_url,
-    };
-    await this.userRepository.updateUser(id, updateUserDto);
+  //(name && about_me) || (title) || (comment_alert && update_alert) || (profile_image)
+  async updateUser(id: number, updateData: object) {
+    const keys: string[] = Object.keys(updateData);
+    const values: string[] = Object.values(updateData);
 
+    await this.userRepository.updateUser(id, keys, values);
+
+    return await this.userRepository.getUserByUserId(id, keys);
+  }
+
+  //(social_info_email && social_info_github && social_info_twitter && social_info_facebook && social_info_url)
+  async updateSociaInfo(id: number, socialInfoDto: SocialInfoDto) {
     await this.socialInfoRepository.updateSocialInfo(id, socialInfoDto);
 
-    const data = await this.userRepository.getUserByUserId(id);
-    return data;
+    const keys: string[] = Object.keys(socialInfoDto);
+
+    return await this.socialInfoRepository.getSocialInfoByUserId(id, keys);
   }
 }

@@ -1,5 +1,5 @@
 import { PickType } from '@nestjs/mapped-types';
-import { Allow } from 'class-validator';
+import { Allow, IsEnum, Length } from 'class-validator';
 import {
   IsBooleanOrNull,
   IsEmailOrNull,
@@ -42,6 +42,11 @@ export class UpdateUserDto {
 
   @IsBooleanOrNull({ message: 'update_alert must be a 1 or 0 or Null' })
   update_alert?: number;
+
+  @IsEnum(['social_info', 'user'], {
+    message: 'type must be a valid enum value. [social_info, user]',
+  })
+  type: string;
 }
 
 export class SocialInfoDto extends PickType(UpdateUserDto, [

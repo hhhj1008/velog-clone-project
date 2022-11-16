@@ -27,4 +27,14 @@ export class SocialInfoRepository extends Repository<SocialInfo> {
       ['user'],
     );
   }
+
+  async getSocialInfoByUserId(id: number, keys: string[]) {
+    const user = await this.query(
+      `
+        SELECT email, facebook, twitter, github, url FROM social_info WHERE userId = ?;
+      `,
+      [id],
+    );
+    return user;
+  }
 }
