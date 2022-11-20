@@ -20,11 +20,9 @@ export class UserService {
 
   //(name && about_me) || (title) || (comment_alert && update_alert) || (profile_image)
   async updateUser(id: number, updateData: object) {
-    const keys: string[] = Object.keys(updateData);
-    const values: string[] = Object.values(updateData);
+    const keys = Object.keys(updateData);
 
-    await this.userRepository.updateUser(id, keys, values);
-
+    await this.userRepository.updateUser(id, updateData);
     return await this.userRepository.getUserByUserId(id, keys);
   }
 
@@ -35,5 +33,11 @@ export class UserService {
     const keys: string[] = Object.keys(socialInfoDto);
 
     return await this.socialInfoRepository.getSocialInfoByUserId(id, keys);
+  }
+
+  async updateProfileImage(id: number, profile_image: string) {
+    await this.userRepository.updateProfileImage(id, profile_image);
+
+    return this.userRepository.getUserByUserId(id, ['profile_image']);
   }
 }

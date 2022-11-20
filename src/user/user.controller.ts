@@ -10,6 +10,7 @@ import {
   ForbiddenException,
   InternalServerErrorException,
   BadRequestException,
+  Query,
 } from '@nestjs/common';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { SocialInfoDto, UpdateUserDto } from 'src/dto/user/update-user.dto';
@@ -25,75 +26,59 @@ export class UserController {
   @HttpCode(201)
   async updateUser(
     @Body() updateUserDto: UpdateUserDto,
+    @Query('type') type: string,
     @Request() req: Request,
   ) {
+    // type: [title, name, profile_image, social_info]
     const { id } = req['user'];
-    const {
-      name,
-      about_me,
-      profile_image,
-      title,
-      social_info_email,
-      social_info_facebook,
-      social_info_github,
-      social_info_twitter,
-      social_info_url,
-      update_alert,
-      comment_alert,
-      type,
-    } = updateUserDto;
     try {
       let data: any = '';
+      let updateData: object = {};
 
       switch (type) {
         case 'social_info':
-          if (
-            name ||
-            about_me ||
-            profile_image ||
-            title ||
-            comment_alert ||
-            update_alert
-          ) {
-            throw new BadRequestException(
-              'social_info type must not includes name, title, profile_image, comment_alert, update_alert',
-            );
-          }
-
           const socialInfoDto: SocialInfoDto = {
-            social_info_email: social_info_email || '',
-            social_info_github: social_info_github || '',
-            social_info_twitter: social_info_twitter || '',
-            social_info_facebook: social_info_facebook || '',
-            social_info_url: social_info_url || '',
+            social_info_email: updateUserDto.social_info_email || null,
+            social_info_github: updateUserDto.social_info_github || null,
+            social_info_twitter: updateUserDto.social_info_twitter || null,
+            social_info_facebook: updateUserDto.social_info_facebook || null,
+            social_info_url: updateUserDto.social_info_url || null,
           };
 
           data = await this.userService.updateSociaInfo(id, socialInfoDto);
 
           break;
 
-        case 'user':
-          if (
-            social_info_email ||
-            social_info_facebook ||
-            social_info_github ||
-            social_info_twitter ||
-            social_info_url
-          ) {
-            throw new BadRequestException(
-              'user type must not includes social_info_email, social_info_github, social_info_twitter, social_info_facebook, social_info_url',
-            );
+        case 'title':
+          if (!updateUserDto.title) {
+            throw new Error('title must be entered');
           }
-
-          const updateData: object = {};
-          for (const [key, value] of Object.entries(updateUserDto)) {
-            if (value && key !== 'type') {
-              updateData[key] = value;
-            }
-          }
-
+          updateData = { title: updateUserDto.title };
           data = await this.userService.updateUser(id, updateData);
+          break;
 
+        case 'name':
+          if (!updateUserDto.name) {
+            throw new Error('name must be entered');
+          }
+          updateData = {
+            name: updateUserDto.name,
+            about_me: updateUserDto.about_me,
+          };
+          data = await this.userService.updateUser(id, updateData);
+          break;
+
+        case 'profile_image':
+          updateData = { profile_image: updateUserDto.profile_image };
+          data = await this.userService.updateUser(id, updateData);
+          break;
+
+        case 'alert':
+          updateData = {
+            comment_alert: updateUserDto.comment_alert,
+            update_alert: updateUserDto.update_alert,
+          };
+          data = await this.userService.updateUser(id, updateData);
           break;
       }
 
@@ -105,17 +90,39 @@ export class UserController {
           '유저 정보가 없습니다. 토큰을 확인해주세요.',
         );
       } else if (
-        err.message ===
-          '(name && about_me) || (title) || (comment_alert && update_alert) || (profile_image)' ||
-        err.message ===
-          'social_info type must not includes name, title, profile_image, comment_alert, update_alert' ||
-        err.message ===
-          'user type must not includes social_info_email, social_info_github, social_info_twitter, social_info_facebook, social_info_url' ||
-        err.message ===
-          '(name && about_me?) || (title) || (comment_alert && update_alert) || (profile_image)'
+        err.message === 'title must be entered' ||
+        err.message === 'name must be entered'
       ) {
         console.log(err);
         throw new BadRequestException(err.message);
+      } else {
+        console.log(err);
+        throw new InternalServerErrorException();
+      }
+    }
+  }
+
+  @Patch('/profile_image')
+  @UsePipes(ValidationPipe)
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(201)
+  async udpateProfileImage(
+    @Body('profile_image') profile_image: string,
+    @Request() req: Request,
+  ) {
+    const { id } = req['user'];
+    try {
+      const data = await this.userService.updateProfileImage(
+        id,
+        profile_image || null,
+      );
+      return { message: 'update profile image success', data: data };
+    } catch (err) {
+      if (err.code === 'ER_NO_REFERENCED_ROW_2') {
+        console.log(err);
+        throw new ForbiddenException(
+          '유저 정보가 없습니다. 토큰을 확인해주세요.',
+        );
       } else {
         console.log(err);
         throw new InternalServerErrorException();
