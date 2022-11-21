@@ -8,7 +8,7 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Board } from './board.entity';
+import { Post } from './post.entity';
 import { User } from './user.entity';
 
 @Entity({ name: 'comments' })
@@ -28,11 +28,15 @@ export class Comment extends BaseEntity {
   @UpdateDateColumn()
   update_at: Date;
 
+  @ManyToOne((type) => Comment)
+  @JoinColumn({ name: 'paren_id' })
+  comment: number;
+
   @ManyToOne((type) => User)
   @JoinColumn({ name: 'user_id' })
   user: number;
 
-  @ManyToOne((type) => Board)
-  @JoinColumn({ name: 'board_id' })
-  board: number;
+  @ManyToOne((type) => Post)
+  @JoinColumn({ name: 'post_id' })
+  post: number;
 }
