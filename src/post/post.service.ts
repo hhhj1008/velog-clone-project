@@ -18,11 +18,18 @@ export class PostService {
   ) {}
 
   async createPost(user: User, data: CreatePostDto, status: number) {
-    const post = await this.postRepository.createPost(user, data, status);
+    const create_post = await this.postRepository.createPost(
+      user,
+      data,
+      status,
+    );
 
-    await this.tagService.tagAction(data.tags, post[0].id, user.id);
+    if (data.tags.length > 0)
+      await this.tagService.tagAction(data.tags, create_post, user.id);
 
-    return { post, is_writer: true };
+    const post = await this.postRepository.selectPostOne(user.id, create_post);
+
+    return { post, create_post };
   }
 
   // async readPost(user: User, post_id: number) {
@@ -41,22 +48,29 @@ export class PostService {
     post_id: number,
     status: number,
   ) {
-    const post = await this.postRepository.updatePost(
+    await this.postRepository.selectPostOne(user.id, post_id);
+    const update_post = await this.postRepository.updatePost(
       user,
       data,
       post_id,
       status,
     );
 
-    await this.tagService.deletePostTag(post[0].id);
-    await this.tagService.tagAction(data.tags, post[0].id, user.id);
+    if (data.tags.length > 0) {
+      await this.tagService.deletePostTag(post_id);
+      await this.tagService.tagAction(data.tags, post_id, user.id);
+    }
 
-    return { post, is_writer: true };
+    const post = await this.postRepository.selectPostOne(user.id, post_id);
+
+    return { post, update_post };
   }
 
   async deletePost(user: User, post_id: number) {
+    const post = await this.postRepository.selectPostOne(user.id, post_id);
     await this.tagService.deletePostTag(post_id);
-    return await this.postRepository.deletePost(user, post_id);
+    const delete_post = await this.postRepository.deletePost(user, post_id);
+    return { post, delete_post };
   }
 
   // velogController 따로 구성하여 해당 기능 분리할 예정.

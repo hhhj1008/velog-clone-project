@@ -8,6 +8,8 @@ import {
   Patch,
   Delete,
   Query,
+  BadRequestException,
+  NotFoundException,
 } from '@nestjs/common';
 import { CreatePostDto } from 'src/dto/post/create-post.dto';
 import { PostService } from './post.service';
@@ -34,7 +36,18 @@ export class PostController {
   ) {
     const result = await this.postService.createPost(user, data, status);
 
-    return { statusCode: 201, message: 'posting success', result: result };
+    if (result.create_post == 0)
+      throw new BadRequestException(`post create failed`);
+
+    if (result.post == 0) {
+      throw new NotFoundException(`해당 게시글을 찾을 수 없습니다.`);
+    }
+
+    return {
+      statusCode: 201,
+      message: 'post create success',
+      result: result.post,
+    };
   }
 
   // @Get('/:id')
@@ -58,13 +71,31 @@ export class PostController {
       status,
     );
 
-    return { statusCode: 200, message: 'update post', result: result };
+    if (result.update_post == 0)
+      throw new BadRequestException(`post update failed`);
+
+    if (result.post == 0) {
+      throw new NotFoundException(`해당 게시글을 찾을 수 없습니다.`);
+    }
+
+    return {
+      statusCode: 200,
+      message: 'post update success',
+      result: result.post,
+    };
   }
 
   @Delete('/:id')
   async deletePost(@GetUser() user: User, @Param('id') post_id: number) {
-    const reuslt = await this.postService.deletePost(user, post_id);
+    const result = await this.postService.deletePost(user, post_id);
 
-    return { statusCode: 200, message: 'delete post', result: reuslt };
+    if (result.delete_post == 0)
+      throw new BadRequestException(`post update failed`);
+
+    if (result.post == 0) {
+      throw new NotFoundException(`해당 게시글을 찾을 수 없습니다.`);
+    }
+
+    return { statusCode: 200, message: 'post delete success' };
   }
 }

@@ -1,8 +1,3 @@
-import {
-  BadRequestException,
-  InternalServerErrorException,
-  NotFoundException,
-} from '@nestjs/common/exceptions';
 import { CreatePostDto } from 'src/dto/post/create-post.dto';
 import { UpdatePostDto } from 'src/dto/post/update-post.dto';
 import { Post } from 'src/entity/post.entity';
@@ -11,16 +6,16 @@ import { EntityRepository, Repository } from 'typeorm';
 
 @EntityRepository(Post)
 export class PostRepository extends Repository<Post> {
-  async selectPostOne(post_id: number) {
+  async selectPostOne(user_id: number, post_id: number) {
     const post = await this.query(
-      `SELECT id, status, views, likes, create_at, update_at, user_id, title, content, thumbnail 
-         FROM post
-         WHERE id = ?`,
-      [post_id],
+      `SELECT id, status, views, likes, create_at, update_at, user_id, title, content, thumbnail,
+      IF(user_id = ?, 'true', 'false') AS is_writer
+      FROM post
+      WHERE id = ?`,
+      [user_id, post_id],
     );
 
-    if (post.length <= 0)
-      throw new NotFoundException(`해당 게시글을 찾을 수 없습니다.`);
+    if (post.length <= 0) return 0;
 
     return post;
   }
@@ -37,13 +32,9 @@ export class PostRepository extends Repository<Post> {
     try {
       await this.save(post);
 
-      const result = await this.selectPostOne(post.id);
-
-      return result;
+      return post.id;
     } catch (err) {
-      if (err.errno) throw new BadRequestException(`posting create failed`);
-
-      throw new InternalServerErrorException();
+      return 0;
     }
   }
 
@@ -53,8 +44,6 @@ export class PostRepository extends Repository<Post> {
     post_id: number,
     status: number,
   ) {
-    await this.selectPostOne(post_id);
-
     const post = this.createQueryBuilder()
       .update(Post)
       .set({
@@ -63,39 +52,33 @@ export class PostRepository extends Repository<Post> {
         status: status,
         thumbnail: data.thumbnail,
       })
-      .where(`id = :post_id AND userid = :user_id`, {
+      .where(`id = :post_id AND user_id = :user_id`, {
         post_id: post_id,
         user_id: user.id,
       });
 
     try {
       await post.execute();
-
-      return await this.selectPostOne(post_id);
+      return 1;
     } catch (err) {
-      if (err.errno) throw new BadRequestException(`posting update failed`);
-
-      throw new InternalServerErrorException();
+      return 0;
     }
   }
 
   async deletePost(user: User, post_id: number) {
-    await this.selectPostOne(post_id);
-
     const post = this.createQueryBuilder()
       .delete()
       .from(Post)
-      .where(`id = :post_id AND userid = :user_id`, {
+      .where(`id = :post_id AND user_id = :user_id`, {
         post_id: post_id,
         user_id: user.id,
       });
 
     try {
-      return await post.execute();
+      await post.execute();
+      return 1;
     } catch (err) {
-      if (err.errno) throw new BadRequestException(`posting update failed`);
-
-      throw new InternalServerErrorException();
+      return 0;
     }
   }
 }
