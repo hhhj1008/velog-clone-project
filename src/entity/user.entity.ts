@@ -13,7 +13,7 @@ export class User extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column({ nullable: true })
   email: string;
 
   @Column({ nullable: true })
@@ -42,4 +42,7 @@ export class User extends BaseEntity {
 
   @Column({ default: false })
   update_alert: boolean;
+
+  @Column({ nullable: true })
+  provider: string;
 }

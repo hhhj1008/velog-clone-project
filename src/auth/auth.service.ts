@@ -5,6 +5,7 @@ import { UserRepository } from 'src/repository/user.repository';
 import * as bcryptjs from 'bcryptjs';
 import { JwtService } from '@nestjs/jwt';
 import { IPayload } from './context/types';
+import { CreateSocialUserDto } from 'src/dto/user/create-social-user.dto';
 
 @Injectable()
 export class AuthService {
@@ -45,6 +46,10 @@ export class AuthService {
     await this.userRepository.signupWithEmail(createUserDto, hashedPassword);
   }
 
+  async signupWithSocial(createSocialUserDto: CreateSocialUserDto) {
+    await this.userRepository.signupWithSocial(createSocialUserDto);
+  }
+
   async validateUser(login_id: string, password: string) {
     const user = await this.userRepository.checkLoginId(login_id);
 
@@ -66,5 +71,44 @@ export class AuthService {
       name: user.name,
     };
     return this.jwtService.sign({ user: payload });
+  }
+
+  async googleLogin(user: object) {
+    if (!user) {
+      return new ForbiddenException(403, 'No user from google');
+    }
+    const data = await this.userRepository.checkEmail(user['email']);
+    if (!data) {
+      return {
+        message: '회원가입 먼저 진행해야합니다',
+        user: user,
+      };
+    }
+
+    const token = await this.login(data);
+    return {
+      message: 'Google login success',
+      token: token,
+    };
+  }
+
+  async githubLogin(user: object) {
+    if (!user) {
+      return new ForbiddenException(403, 'No user from github');
+    }
+    // console.log(user['email']);
+    const data = await this.userRepository.checkLoginId(user['login_id']);
+    if (!data) {
+      return {
+        message: '회원가입 먼저 진행해야합니다',
+        user: user,
+      };
+    }
+
+    const token = await this.login(data);
+    return {
+      message: 'Github login success',
+      token: token,
+    };
   }
 }

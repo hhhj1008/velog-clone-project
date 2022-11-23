@@ -13,8 +13,11 @@ import {
   Request,
   Get,
 } from '@nestjs/common';
+import { CreateSocialUserDto } from 'src/dto/user/create-social-user.dto';
 import { CreateUserDto } from 'src/dto/user/create-user.dto';
 import { AuthService } from './auth.service';
+import { GithubAuthGuard } from './guards/github-oauth.guard';
+import { GoogleOAuthGuard } from './guards/google-oauth.guard';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 
 @Controller('auth')
@@ -47,11 +50,27 @@ export class AuthController {
           await this.authService.signupWithEmail(createUserDto);
           break;
         case 'github':
-          return Object.assign({ message: 'github signup' });
+          const createGithubUserDto: CreateSocialUserDto = {
+            name: createUserDto.name,
+            login_id: createUserDto.login_id,
+            about_me: createUserDto.about_me,
+            profile_image: createUserDto.profile_image,
+            provider: type,
+          };
+          await this.authService.signupWithSocial(createGithubUserDto);
+          break;
         // break;
         case 'google':
-          return Object.assign({ message: 'google signup' });
-        // break;
+          const createGoogleUserDto: CreateSocialUserDto = {
+            name: createUserDto.name,
+            login_id: createUserDto.login_id,
+            email: createUserDto.email,
+            about_me: createUserDto.about_me,
+            profile_image: createUserDto.profile_image,
+            provider: type,
+          };
+          await this.authService.signupWithSocial(createGoogleUserDto);
+          break;
         case 'facebook':
           return Object.assign({ message: 'facebook signup' });
         // break;
@@ -78,4 +97,27 @@ export class AuthController {
     const token = await this.authService.login(req.user);
     return { message: 'login success', token };
   }
+
+  @Get('/github/callback')
+  @UseGuards(GithubAuthGuard)
+  async githubAuthRedirect(@Request() req) {
+    console.log('user: ', req.user);
+    const data = await this.authService.githubLogin(req.user);
+    return data;
+  }
+
+  @Get('/github')
+  @UseGuards(GithubAuthGuard)
+  async githubAuth(@Request() req) {}
+
+  @Get('/google/callback')
+  @UseGuards(GoogleOAuthGuard)
+  googleAuthRedirect(@Request() req) {
+    const data = this.authService.googleLogin(req.user);
+    return data;
+  }
+
+  @Get('/google')
+  @UseGuards(GoogleOAuthGuard)
+  async googleAuth(@Request() req) {}
 }
