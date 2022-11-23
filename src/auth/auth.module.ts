@@ -12,6 +12,7 @@ import { UserModule } from 'src/user/user.module';
 import { LocalStrategy } from './strategies/local.strategy';
 import { GoogleStrategy } from './strategies/google.strategy';
 import { GithubStrategy } from './strategies/github.strategy';
+import { FacebookStrategy } from './strategies/facebook.strategy';
 
 @Module({
   imports: [
@@ -41,6 +42,7 @@ import { GithubStrategy } from './strategies/github.strategy';
     JwtStrategy,
     GoogleStrategy,
     GithubStrategy,
+    FacebookStrategy,
   ],
   exports: [AuthService],
 })

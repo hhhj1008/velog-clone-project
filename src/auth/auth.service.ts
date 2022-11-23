@@ -43,11 +43,18 @@ export class AuthService {
     const salt = bcryptjs.genSaltSync(10);
     const hashedPassword = bcryptjs.hashSync(password, salt);
 
-    await this.userRepository.signupWithEmail(createUserDto, hashedPassword);
+    const user = await this.userRepository.signupWithEmail(
+      createUserDto,
+      hashedPassword,
+    );
+    return await this.login(user);
   }
 
   async signupWithSocial(createSocialUserDto: CreateSocialUserDto) {
-    await this.userRepository.signupWithSocial(createSocialUserDto);
+    const user = await this.userRepository.signupWithSocial(
+      createSocialUserDto,
+    );
+    return await this.login(user);
   }
 
   async validateUser(login_id: string, password: string) {
@@ -108,6 +115,25 @@ export class AuthService {
     const token = await this.login(data);
     return {
       message: 'Github login success',
+      token: token,
+    };
+  }
+
+  async facebookLogin(user: object) {
+    if (!user) {
+      return new ForbiddenException(403, 'No user from facebook');
+    }
+    const data = await this.userRepository.checkEmail(user['email']);
+    if (!data) {
+      return {
+        message: '회원가입 먼저 진행해야합니다',
+        user: user,
+      };
+    }
+
+    const token = await this.login(data);
+    return {
+      message: 'Facebook login success',
       token: token,
     };
   }

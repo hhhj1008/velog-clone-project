@@ -29,7 +29,7 @@ export class UserRepository extends Repository<User> {
       about_me,
       title: login_id + '.log',
     });
-    await this.save(user);
+    return await this.save(user);
   }
 
   async signupWithSocial(createSocialUserDto: CreateSocialUserDto) {
@@ -45,7 +45,7 @@ export class UserRepository extends Repository<User> {
       title: login_id + '.log',
     });
 
-    await this.save(user);
+    return await this.save(user);
   }
 
   async updateUser(id: number, updateData: object) {
