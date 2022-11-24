@@ -24,8 +24,10 @@ export class SeriesService {
     await this.seriesRepository.updateSeriesPostCount(user_id);
   }
 
-  async deletePostSeries(post_id: number) {
+  async deletePostSeries(post_id: number, user_id: number) {
     await this.postSeriesRepository.deletePostSeries(post_id);
+
+    await this.seriesRepository.updateSeriesPostCount(user_id);
   }
 
   async createSeries(user_id: number, series_name: string) {
