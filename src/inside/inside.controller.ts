@@ -1,4 +1,17 @@
-import { Controller, Get, Param, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Headers,
+  Param,
+  ParseIntPipe,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { GetUser } from 'src/custom-decorator/get-user.decorator';
+import { ValidateToken } from 'src/custom-decorator/validate-token.decorator';
+import { User } from 'src/entity/user.entity';
 import { InsideService } from './inside.service';
 
 @Controller('inside')
@@ -19,8 +32,13 @@ export class InsideController {
   async getPostDetail(
     @Param('user_id') user_id: number,
     @Param('post_id') post_id: number,
+    @ValidateToken() user?: User,
   ) {
-    const result = await this.insideService.getPostDetail(user_id, post_id);
+    const result = await this.insideService.getPostDetail(
+      user_id,
+      post_id,
+      user,
+    );
 
     return {
       statusCode: 200,
