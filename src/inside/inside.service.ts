@@ -42,7 +42,6 @@ export class InsideService {
   }
 
   async getAboutBlog(user_id: number) {
-    console.log('test>>>>>>>>>>>>>>>>');
     return await this.userService.selectAboutBlog(user_id);
   }
 
