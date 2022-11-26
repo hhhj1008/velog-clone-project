@@ -8,6 +8,8 @@ import { CommentModule } from './comment/comment.module';
 import { InsideModule } from './inside/inside.module';
 import { SeriesModule } from './series/series.module';
 import { ListsModule } from './lists/lists.module';
+import { MainModule } from './main/main.module';
+
 
 @Module({
   imports: [
@@ -20,6 +22,7 @@ import { ListsModule } from './lists/lists.module';
     InsideModule,
     SeriesModule,
     ListsModule,
+    MainModule,
   ],
   providers: [],
   controllers: [],

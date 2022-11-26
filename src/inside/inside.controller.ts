@@ -1,22 +1,32 @@
 import {
+  Body,
   Controller,
   Get,
-  Headers,
   Param,
-  ParseIntPipe,
+  Patch,
   Post,
   Query,
-  UseGuards,
 } from '@nestjs/common';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { GetUser } from 'src/custom-decorator/get-user.decorator';
 import { ValidateToken } from 'src/custom-decorator/validate-token.decorator';
 import { User } from 'src/entity/user.entity';
+import { AboutBlogDto } from 'src/dto/user/about-blog.dto';
 import { InsideService } from './inside.service';
 
 @Controller('inside')
 export class InsideController {
   constructor(private readonly insideService: InsideService) {}
+
+  @Get('/:user_id/series')
+  async getSeries(@Param('user_id') user_id: number) {}
+
+  @Get('/:user_id/about')
+  async getAbout(@Param('user_id') user_id: number) {
+    const result = await this.insideService.getAboutBlog(user_id);
+
+    return { statusCode: 200, about: result };
+  }
 
   @Get('/:user_id')
   async getInsidePage(
@@ -50,9 +60,16 @@ export class InsideController {
     };
   }
 
-  @Get('/:user_id/series')
-  async getSeries(@Param('user_id') user_id: number) {}
+  @Patch('/:user_id/about')
+  async editAboutBlog(
+    @Param('user_id') user_id: number,
+    @Body() data: AboutBlogDto,
+  ) {
+    const result = await this.insideService.editAboutBlog(
+      user_id,
+      data.about_blog,
+    );
 
-  @Get('/:user_id/about')
-  async getAbout(@Param('user_id') user_id: number) {}
+    return { statusCode: 200, about: result };
+  }
 }
