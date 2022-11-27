@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { CommentService } from 'src/comment/comment.service';
 import { PostService } from 'src/post/post.service';
 import { PostReadLogRepository } from 'src/repository/post-read-log.repository';
@@ -7,6 +7,7 @@ import { TagService } from 'src/tag/tag.service';
 import { JwtService } from '@nestjs/jwt';
 import { User } from 'src/entity/user.entity';
 import { UserService } from 'src/user/user.service';
+import { PostLikeRepository } from 'src/repository/post-like.repository';
 
 @Injectable()
 export class InsideService {
@@ -18,6 +19,7 @@ export class InsideService {
     private postReadLogRepository: PostReadLogRepository,
     private readonly jwtService: JwtService,
     private userService: UserService,
+    private postLikeRepository: PostLikeRepository,
   ) {}
 
   async getInsidePage(user_id: number, tag_id: number) {
@@ -65,5 +67,13 @@ export class InsideService {
     await this.userService.updateAboutBlog(user_id, about_blog);
 
     return await this.userService.selectAboutBlog(user_id);
+  }
+
+  async likePost(user_id: number, post_id: number) {
+    await this.postLikeRepository.likePost(user_id, post_id);
+  }
+
+  async unlikePost(user_id: number, post_id: number) {
+    await this.postLikeRepository.unlikePost(user_id, post_id);
   }
 }
