@@ -15,6 +15,10 @@ export class PostLikeRepository extends Repository<PostLike> {
       .execute();
   }
 
+  async getLikedPostOne(user_id: number, post_id: number) {
+    return await this.findOne({ user: user_id, post: post_id });
+  }
+
   async getLikedList(user_id: number) {
     return await this.query(
       `
