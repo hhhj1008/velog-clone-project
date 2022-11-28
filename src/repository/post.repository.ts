@@ -235,48 +235,34 @@ export class PostRepository extends Repository<Post> {
     return await main_posts.getRawMany();
   }
 
-  async interestedPostList(tag_ids: string) {}
+  async interestedPostList(tag_ids: string[]) {}
 
   async mainSearch(keywords: string) {
-    return this.query(
-      `
-        WITH tags AS (
-          SELECT 
-            post.id post_id,
-            tag.id tag_id,
-            JSON_ARRAYAGG(
-              JSON_OBJECT(
-                'tag_id',tag.id, 
-                'tag_name', tag.name
-              )
-            ) as tags   
-            FROM post 
-            LEFT JOIN post_tag ON post.id = post_tag.post_id
-            LEFT JOIN tag ON post_tag.tag_id = tag.id
-            WHERE post_tag.post_id = post.id
-        )
-        
-        SELECT 
-            distinct
-            post.id post_id,
-            post.title,
-            post.content,
-            post.thumbnail,
-            post.comment_count,
-            DATE_FORMAT(post.create_at, '%Y년 %m월 %d일') create_at,
-            tags.tags,
-            user.id user_id,
-            user.name,
-            user.profile_image
-          FROM post
-          LEFT JOIN user ON post.user_id = user.id
-          LEFT JOIN post_tag ON post.id = post_tag.post_id
-          LEFT JOIN tag ON post_tag.tag_id = tag.id
-          LEFT JOIN tags ON tags.post_id = post.id
-          WHERE post.title REGEXP ? OR post.content REGEXP ? OR tag.name REGEXP ?
-          ORDER BY post.create_at DESC
-      `,
-      [keywords, keywords, keywords],
-    );
+    console.log(keywords);
+    let main_search = this.createQueryBuilder('post')
+      .leftJoin('post.user', 'user')
+      .leftJoin('post.tags', 'tags')
+      .leftJoin('post_tag', 'post_tag', 'post.id = post_tag.post_id')
+      .leftJoin('tag', 'tag', 'post_tag.tag_id = tag.id')
+      .select([
+        'user.id AS user_id',
+        'user.profile_image',
+        'user.login_id',
+        'post.id AS post_id',
+        'post.thumbnail',
+        'post.title',
+        'post.content',
+        'post.create_at',
+        'post.comment_count',
+        'IF(INSTR(tags.tags,\'"tag_id": null\'), null, tags.tags) AS tags',
+      ])
+      .orWhere('post.title REGEXP :keywords', { keywords: keywords })
+      .orWhere('post.content REGEXP :keywords', { keywords: keywords })
+      .orWhere('tag.name REGEXP :keywords', { keywords: keywords })
+      .groupBy('post.id')
+      .orderBy('post.id', 'DESC')
+      .limit(10000);
+
+    return await main_search.getRawMany();
   }
 }
