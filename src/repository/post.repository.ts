@@ -168,27 +168,29 @@ export class PostRepository extends Repository<Post> {
     return posts;
   }
 
-  async selectNextPost(post_id: number) {
+  async selectNextPost(post_id: number, user_id: number) {
     const next_post = await this.query(
       `SELECT 
     post.id AS post_id,
     post.title
     FROM post
-    WHERE id = (SELECT id FROM post WHERE id > ? ORDER BY id LIMIT 1)`,
-      [post_id],
+    WHERE id = (SELECT id FROM post WHERE id > ? ORDER BY id LIMIT 1)
+    AND post.user_id = ?`,
+      [post_id, user_id],
     );
 
     return next_post;
   }
 
-  async selectPrePost(post_id: number) {
+  async selectPrePost(post_id: number, user_id: number) {
     const pre_post = await this.query(
       `SELECT 
     post.id AS post_id,
     post.title
     FROM post
-    WHERE id = (SELECT id FROM post WHERE id < ? ORDER BY id DESC LIMIT 1)`,
-      [post_id],
+    WHERE id = (SELECT id FROM post WHERE id < ? ORDER BY id DESC LIMIT 1)
+    AND post.user_id = ?`,
+      [post_id, user_id],
     );
 
     return pre_post;
