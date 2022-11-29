@@ -272,12 +272,15 @@ export class PostRepository extends Repository<Post> {
       ])
       .orderBy('RAND()')
       .limit(12);
-
     return await posts.getRawMany();
   }
 
-  async mainSearch(keywords: string, offset: number, limit: number) {
-    console.log(keywords);
+  async mainSearch(
+    keywords: string,
+    user_id: number,
+    offset: number,
+    limit: number,
+  ) {
     let main_search = this.createQueryBuilder('post')
       .leftJoin('post.user', 'user')
       .leftJoin('post.tags', 'tags')
@@ -299,9 +302,14 @@ export class PostRepository extends Repository<Post> {
       .orWhere('post.content REGEXP :keywords', { keywords: keywords })
       .orWhere('tag.name REGEXP :keywords', { keywords: keywords })
       .groupBy('post.id')
-      .orderBy('post.id', 'DESC')
-      .offset(offset * limit - limit)
-      .limit(limit);
+      .orderBy('post.id', 'DESC');
+
+    if (user_id) {
+      main_search.andWhere('post.user_id = :user_id', { user_id: user_id });
+    }
+
+    main_search.offset(offset * limit - limit);
+    main_search.limit(limit);
 
     return await main_search.getRawMany();
   }

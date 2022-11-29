@@ -16,9 +16,14 @@ export class SearchController {
   @UsePipes(ValidationPipe)
   async mainSearch(
     @Query('keyword') keyword: string,
+    @Query('userId') user_id: number,
     @Query() pagination: PaginationDto,
   ) {
-    const data = await this.searchService.mainSearch(keyword, pagination);
+    const data = await this.searchService.mainSearch(
+      keyword,
+      user_id,
+      pagination,
+    );
     return data;
   }
 }
