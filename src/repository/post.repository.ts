@@ -277,7 +277,8 @@ export class PostRepository extends Repository<Post> {
 
   async mainSearch(
     keywords: string,
-    user_id: number,
+    userId: number,
+    user: User,
     offset: number,
     limit: number,
   ) {
@@ -308,8 +309,16 @@ export class PostRepository extends Repository<Post> {
       .groupBy('post.id')
       .orderBy('post.id', 'DESC');
 
-    if (user_id) {
-      main_search.andWhere('post.user_id = :user_id', { user_id: user_id });
+    if (userId) {
+      main_search.andWhere('post.user_id = :userId', { userId: userId });
+    }
+
+    if (user) {
+      main_search
+        .addSelect([
+          'EXISTS (SELECT * FROM follow WHERE follow.follower_id = :user_id AND follow.followee_id = post.user_id) AS IsFollower',
+        ])
+        .setParameter('user_id', user['sub']);
     }
 
     main_search.offset(offset * limit - limit);
