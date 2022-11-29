@@ -50,10 +50,11 @@ export class SeriesService {
     return post_series;
   }
 
-  async selectSeriesDetail(user_id: number, series_id: number) {
+  async selectSeriesDetail(user_id: number, series_id: number, type: string) {
     const series = await this.seriesRepository.selectSeriesDetail(
       user_id,
       series_id,
+      type,
     );
 
     return series;

@@ -44,7 +44,7 @@ export class SeriesRepository extends Repository<Series> {
     return await series.getRawMany();
   }
 
-  async selectSeriesDetail(user_id: number, series_id: number) {
+  async selectSeriesDetail(user_id: number, series_id: number, type: string) {
     const series = this.createQueryBuilder('series')
       .leftJoin('series.post_series', 'post_series')
       .leftJoin('post', 'post', 'post_series.post_id = post.id')
@@ -59,8 +59,16 @@ export class SeriesRepository extends Repository<Series> {
         'post.title',
         'post.content',
         'post.create_at',
-      ])
-      .orderBy('post_series.sort', 'ASC');
+      ]);
+
+    switch (type) {
+      case 'asc':
+        series.orderBy('post_series.sort', 'ASC');
+        break;
+      case 'desc':
+        series.orderBy('post_series.sort', 'DESC');
+        break;
+    }
 
     return await series.getRawMany();
   }

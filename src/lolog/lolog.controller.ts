@@ -38,8 +38,13 @@ export class LologController {
   async getSeriesDetail(
     @Param('user_id') user_id: number,
     @Param('series_id') series_id: number,
+    @Query('type') type: string,
   ) {
-    const result = await this.lologService.getSeriesDetail(user_id, series_id);
+    const result = await this.lologService.getSeriesDetail(
+      user_id,
+      series_id,
+      type,
+    );
 
     return { statusCode: 200, series: result };
   }

@@ -64,10 +64,11 @@ export class LologService {
     return series;
   }
 
-  async getSeriesDetail(user_id: number, series_id: number) {
+  async getSeriesDetail(user_id: number, series_id: number, type: string) {
     const series = await this.seriesService.selectSeriesDetail(
       user_id,
       series_id,
+      type,
     );
 
     return series;
