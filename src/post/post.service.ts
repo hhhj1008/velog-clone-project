@@ -7,6 +7,7 @@ import { SeriesService } from 'src/series/series.service';
 import { TagService } from 'src/tag/tag.service';
 import { getImageURL, deleteImageFile } from 'src/lib/multerOptions';
 import { PaginationDto } from 'src/dto/pagination.dto';
+import { CommentService } from 'src/comment/comment.service';
 
 /**
  * @todo 게시글 삭제 시에 tag 테이블의 post_count 관련 기능은 추후 구현할 예정..
@@ -41,9 +42,10 @@ export class PostService {
       );
     }
 
+    const series = await this.seriesService.selectPostSeriesList(create_post);
     const post = await this.selectPostOne(user.id, create_post);
 
-    return { post, create_post };
+    return { post, create_post, series };
   }
 
   async selectPostOne(user_id: number, post_id: number) {
@@ -99,8 +101,9 @@ export class PostService {
     }
 
     const post = await this.postRepository.selectPostOne(user.id, post_id);
+    const series = await this.seriesService.selectPostSeriesList(post_id);
 
-    return { post, update_post };
+    return { post, update_post, series };
   }
 
   async deletePost(user: User, post_id: number) {
