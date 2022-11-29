@@ -115,6 +115,8 @@ export class PostRepository extends Repository<Post> {
     is_writer: boolean,
     tag_id: number,
     saves: boolean,
+    offset: number,
+    limit: number,
   ) {
     let posts = this.createQueryBuilder('post')
       .leftJoin('post.user', 'user')
@@ -151,6 +153,9 @@ export class PostRepository extends Repository<Post> {
     if (tag_id) {
       posts.andWhere('post_tag.tag_id = :tag_id', { tag_id: tag_id });
     }
+
+    posts.offset(offset * limit - limit);
+    posts.limit(limit);
 
     return await posts.getRawMany();
   }
@@ -250,7 +255,7 @@ export class PostRepository extends Repository<Post> {
     // 관심 있을 만한 포스트는 임의로 랜덤 12개 가지고 오도록 하였음.
     const posts = this.createQueryBuilder('post')
       .leftJoin('post.user', 'user')
-      .leftJoin('post.tags', 'tags')
+      .leftJoin('post.post_tag', 'post_tag')
       .leftJoin('tag', 'tag', 'post_tag.tag_id = tag.id')
       .select([
         'user.id AS user_id',
@@ -271,7 +276,7 @@ export class PostRepository extends Repository<Post> {
     return await posts.getRawMany();
   }
 
-  async mainSearch(keywords: string) {
+  async mainSearch(keywords: string, offset: number, limit: number) {
     console.log(keywords);
     let main_search = this.createQueryBuilder('post')
       .leftJoin('post.user', 'user')
@@ -295,7 +300,8 @@ export class PostRepository extends Repository<Post> {
       .orWhere('tag.name REGEXP :keywords', { keywords: keywords })
       .groupBy('post.id')
       .orderBy('post.id', 'DESC')
-      .limit(10000);
+      .offset(offset * limit - limit)
+      .limit(limit);
 
     return await main_search.getRawMany();
   }

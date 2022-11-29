@@ -6,6 +6,7 @@ import { PostRepository } from 'src/repository/post.repository';
 import { SeriesService } from 'src/series/series.service';
 import { TagService } from 'src/tag/tag.service';
 import { getImageURL, deleteImageFile } from 'src/lib/multerOptions';
+import { PaginationDto } from 'src/dto/pagination.dto';
 
 /**
  * @todo 게시글 삭제 시에 tag 테이블의 post_count 관련 기능은 추후 구현할 예정..
@@ -62,7 +63,9 @@ export class PostService {
     );
     const pre_post = await this.postRepository.selectPrePost(post_id, user_id);
 
-    return { post, next_post, pre_post };
+    const interested_posts = await this.postRepository.interestedPostList();
+
+    return { post, next_post, pre_post, interested_posts };
   }
 
   async updatePost(
@@ -107,12 +110,19 @@ export class PostService {
     return { post, delete_post };
   }
 
-  async selectPostList(user_id: number, tag_id: number) {
+  async selectPostList(
+    user_id: number,
+    tag_id: number,
+    saves: boolean,
+    pagination: PaginationDto,
+  ) {
     const posts = await this.postRepository.selectPostList(
       user_id,
       true,
       tag_id,
-      true,
+      saves,
+      pagination.offset,
+      pagination.limit,
     );
 
     for (let i = 0; i < posts.length; i++) {

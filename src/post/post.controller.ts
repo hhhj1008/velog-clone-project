@@ -22,11 +22,31 @@ import { UpdatePostDto } from 'src/dto/post/update-post.dto';
 import { CreateSeriesDto } from 'src/dto/series/create-series.dto';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { multerOptions } from 'src/lib/multerOptions';
+import { PaginationDto } from 'src/dto/pagination.dto';
 
 @Controller('posts')
 @UseGuards(JwtAuthGuard)
 export class PostController {
   constructor(private readonly postService: PostService) {}
+
+  @Get('/:user_id')
+  async savesPostList(
+    @GetUser() user: User,
+    @Param('user_id') user_id: number,
+    @Query() pagination: PaginationDto,
+  ) {
+    const result = await this.postService.selectPostList(
+      user_id,
+      null,
+      true,
+      pagination,
+    );
+
+    return {
+      statusCode: 200,
+      post: result,
+    };
+  }
 
   @Post('')
   async createPost(
