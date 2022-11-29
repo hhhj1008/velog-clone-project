@@ -40,7 +40,7 @@ export class PostService {
       );
     }
 
-    const post = await this.postRepository.selectPostOne(user.id, create_post);
+    const post = await this.selectPostOne(user.id, create_post);
 
     return { post, create_post };
   }
@@ -112,6 +112,7 @@ export class PostService {
       user_id,
       true,
       tag_id,
+      true,
     );
 
     for (let i = 0; i < posts.length; i++) {
@@ -144,7 +145,9 @@ export class PostService {
   async thumbnailUpload(files: File[], file_name: string) {
     if (file_name) deleteImageFile(file_name);
 
-    return getImageURL(files);
+    let url = getImageURL(files);
+
+    return url[0];
   }
 
   async thumbnailDelete(file_name: string) {

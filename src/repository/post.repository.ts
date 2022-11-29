@@ -110,7 +110,12 @@ export class PostRepository extends Repository<Post> {
     }
   }
 
-  async selectPostList(user_id: number, is_writer: boolean, tag_id: number) {
+  async selectPostList(
+    user_id: number,
+    is_writer: boolean,
+    tag_id: number,
+    saves: boolean,
+  ) {
     let posts = this.createQueryBuilder('post')
       .leftJoin('post.user', 'user')
       .leftJoin('post.tags', 'tags')
@@ -129,11 +134,17 @@ export class PostRepository extends Repository<Post> {
         'post.status',
       ])
       .groupBy('post.id')
-      .orderBy('post.id', 'DESC');
+      .orderBy('post.create_at', 'DESC');
 
-    if (is_writer == true) {
+    if (saves) {
+      posts.andWhere('post.status = 3');
+    }
+
+    if (is_writer && !saves) {
       posts.andWhere("post.status REGEXP '1|2'");
-    } else {
+    }
+
+    if (!is_writer && !saves) {
       posts.andWhere('post.status = 1');
     }
 
@@ -235,7 +246,30 @@ export class PostRepository extends Repository<Post> {
     return await main_posts.getRawMany();
   }
 
-  async interestedPostList(tag_ids: string[]) {}
+  async interestedPostList() {
+    // 관심 있을 만한 포스트는 임의로 랜덤 12개 가지고 오도록 하였음.
+    const posts = this.createQueryBuilder('post')
+      .leftJoin('post.user', 'user')
+      .leftJoin('post.tags', 'tags')
+      .leftJoin('tag', 'tag', 'post_tag.tag_id = tag.id')
+      .select([
+        'user.id AS user_id',
+        'user.profile_image',
+        'user.login_id',
+        'post.id AS post_id',
+        'post.thumbnail',
+        'post.title',
+        'post.content',
+        'post.create_at',
+        'post.comment_count',
+        'post.likes',
+        'post.views',
+      ])
+      .orderBy('RAND()')
+      .limit(12);
+
+    return await posts.getRawMany();
+  }
 
   async mainSearch(keywords: string) {
     console.log(keywords);

@@ -39,10 +39,6 @@ export class PostController {
     if (result.create_post == 0)
       throw new BadRequestException(`post create failed`);
 
-    if (result.post == 0) {
-      throw new NotFoundException(`해당 게시글을 찾을 수 없습니다.`);
-    }
-
     return {
       statusCode: 201,
       message: 'post create success',
@@ -51,12 +47,12 @@ export class PostController {
   }
 
   @UseInterceptors(FilesInterceptor('image', 1, multerOptions))
-  @Post('/thumbnai')
-  thumbnailUpload(
+  @Post('/thumbnail')
+  async thumbnailUpload(
     @UploadedFiles() files: File[],
     @Body('file_name') file_name: string,
   ) {
-    const result = this.postService.thumbnailUpload(files, file_name);
+    const result = await this.postService.thumbnailUpload(files, file_name);
 
     return {
       statusCode: 200,
@@ -65,7 +61,7 @@ export class PostController {
     };
   }
 
-  @Delete('/thumbnai')
+  @Delete('/thumbnail')
   thumbnailDelete(@Body('file_name') file_name: string) {
     this.postService.thumbnailDelete(file_name);
 
