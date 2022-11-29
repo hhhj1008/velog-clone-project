@@ -18,6 +18,7 @@ export class SearchController {
     @Query('userId') user_id: number,
   ) {
     const data = await this.searchService.mainSearch(keyword, user_id);
+
     return data;
   }
 }

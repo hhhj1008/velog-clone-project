@@ -237,6 +237,7 @@ export class PostRepository extends Repository<Post> {
 
   async interestedPostList(tag_ids: string[]) {}
 
+
   async mainSearch(keywords: string, user_id: number) {
     let main_search = this.createQueryBuilder('post')
       .leftJoin('post.user', 'user')
