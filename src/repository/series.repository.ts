@@ -52,7 +52,7 @@ export class SeriesRepository extends Repository<Series> {
         'series.user_id AS user_id',
         'post.id AS post_id',
         'post_series.sort',
-        'post.thumbnail',
+        'series.thumbnail',
         'post.title',
         'post.content',
         'post.create_at',
