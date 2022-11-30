@@ -19,9 +19,11 @@ export class SearchController {
   async mainSearch(
     @Query('keyword') keyword: string,
     @Query('userId') user_id: number,
-    @Query() pagination: PaginationDto,
+    @Query('offset') offset: number,
+    @Query('limit') limit: number,
     @ValidateToken() user: User,
   ) {
+    const pagination: PaginationDto = { offset: offset, limit: limit };
     const data = await this.searchService.mainSearch(
       keyword,
       user_id,
