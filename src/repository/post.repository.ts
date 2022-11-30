@@ -39,41 +39,6 @@ export class PostRepository extends Repository<Post> {
         .setParameter('id', user['sub']);
     }
     const post = await query.getRawMany();
-    // const post = await this.query(
-    //   `WITH tags AS (
-    //     SELECT
-    //     post.id AS post_id,
-    //     JSON_ARRAYAGG(
-    //       JSON_OBJECT(
-    //         'tag_id', tag.id,
-    //         'tag_name', tag.name
-    //       )
-    //     ) AS tags
-    //     FROM post
-    //     LEFT JOIN post_tag pt ON pt.post_id = post.id
-    //     LEFT JOIN tag ON tag.id = pt.tag_id
-    //     GROUP BY post.id
-    //     )
-
-    //     SELECT
-    //     user.id AS user_id,
-    //     user.login_id,
-    //     user.name,
-    //     user.profile_image,
-    //     user.about_me,
-    //     post.id,
-    //     post.title,
-    //     post.status,
-    //     post.content,
-    //     IF(INSTR(tags.tags,'"tag_id": null'), null, tags.tags) AS  tags,
-    //     post.comment_count,
-    //     IF(user_id = ?, 1, 0) AS is_writer
-    //     FROM post
-    //     LEFT JOIN user ON user.id = post.user_id
-    //     LEFT JOIN tags ON tags.post_id = post.id
-    //     WHERE user.id = ? AND post.id = ?`,
-    //   [user_id, user_id, post_id],
-    // );
 
     if (post.length <= 0) return 0;
 
