@@ -56,7 +56,6 @@ export class SeriesController {
   }
 
   @Patch('/:id')
-  @UseGuards(JwtAuthGuard)
   async updatePostSeriesSort(
     @Param('id') series_id: number,
     @Body('sort') sort,
@@ -67,7 +66,6 @@ export class SeriesController {
   }
 
   @Delete('/:id')
-  @UseGuards(JwtAuthGuard)
   async deleteSeries(@Param('id') series_id: number) {
     await this.seriesService.deleteSeries(series_id);
 
