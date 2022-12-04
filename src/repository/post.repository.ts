@@ -1,6 +1,7 @@
 import { UpdatePostDto } from 'src/dto/post/update-post.dto';
 import { Post } from 'src/entity/post.entity';
 import { User } from 'src/entity/user.entity';
+import { MainPostsType, PeriodType } from 'src/main/main.model';
 import { Brackets, EntityRepository, Repository } from 'typeorm';
 
 @EntityRepository(Post)
@@ -187,7 +188,7 @@ export class PostRepository extends Repository<Post> {
     return pre_post;
   }
 
-  async selectPostListForMain(type: string, period: string) {
+  async selectPostListForMain(type: MainPostsType, period: PeriodType) {
     let main_posts = this.createQueryBuilder('post')
       .leftJoin('post.user', 'user')
       .select([
@@ -205,28 +206,28 @@ export class PostRepository extends Repository<Post> {
       ]);
 
     switch (period) {
-      case 'TODAY':
+      case PeriodType.TODAY:
         main_posts.where('DAYOFMONTH(post.create_at) = DAYOFMONTH(CURDATE())');
         break;
-      case 'WEEK':
+      case PeriodType.WEEK:
         main_posts.where(
           "post.create_at BETWEEN DATE_FORMAT(DATE_SUB(CURDATE(), INTERVAL (DAYOFWEEK(CURDATE())-1) DAY), '%Y/%m/%d')" +
             "AND DATE_FORMAT(DATE_SUB(CURDATE(), INTERVAL (DAYOFWEEK(CURDATE())-7) DAY), '%Y/%m/%d')",
         );
         break;
-      case 'MONTH':
+      case PeriodType.MONTH:
         main_posts.where('MONTH(post.create_at) = MONTH(NOW())');
         break;
-      case 'YEAR':
+      case PeriodType.YEAR:
         main_posts.where('WHERE YEAR(post.create_at) = YEAR(NOW())');
         break;
     }
 
     switch (type) {
-      case 'NEW':
+      case MainPostsType.RECENT:
         main_posts.orderBy('post.create_at', 'DESC');
         break;
-      case 'TREND':
+      case MainPostsType.TREND:
         main_posts.andWhere('post.likes > 0 AND post.views > 0');
         main_posts.groupBy('post.id');
         main_posts.orderBy('SUM(post.likes + post.views)', 'DESC');
