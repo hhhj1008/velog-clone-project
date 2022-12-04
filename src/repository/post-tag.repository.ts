@@ -1,7 +1,3 @@
-import {
-  BadRequestException,
-  InternalServerErrorException,
-} from '@nestjs/common/exceptions';
 import { PostTag } from 'src/entity/post-tag.entity';
 import { EntityRepository, Repository } from 'typeorm';
 
@@ -13,11 +9,7 @@ export class PostTagRepository extends Repository<PostTag> {
       post: post_id,
     });
 
-    try {
-      return await this.save(post_tag);
-    } catch (err) {
-      console.log(err);
-    }
+    await this.save(post_tag);
   }
 
   async deletePostTag(post_id: number) {
@@ -26,11 +18,7 @@ export class PostTagRepository extends Repository<PostTag> {
       .from(PostTag)
       .where(`post_id = :post_id`, { post_id: post_id });
 
-    try {
-      return await post_tag.execute();
-    } catch (err) {
-      console.log(err);
-    }
+    await post_tag.execute();
   }
 
   async selectTagListByUserId(user_id: number) {
