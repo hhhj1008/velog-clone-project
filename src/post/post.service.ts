@@ -23,18 +23,16 @@ export class PostService {
     private seriesService: SeriesService,
   ) {}
 
-  async createTag(tags: string[], post_id: number, user_id: number) {
-    let tag_ids: number[] = [];
+  async createTag(tags: string[], post_id: number) {
+    let insert_post_tag = [];
     for (let i = 0; i < tags.length; i++) {
       await this.tagRepository.insertTag(tags[i], '');
       const tag_id = await this.tagRepository.findOne({ name: tags[i] });
 
-      tag_ids.push(tag_id.id);
+      insert_post_tag.push({ tag: tag_id.id, post: post_id });
     }
 
-    for (let i = 0; i < tag_ids.length; i++) {
-      await this.postTagRepository.insertPostTag(tag_ids[i], post_id);
-    }
+    await this.postTagRepository.insertPostTag(insert_post_tag);
   }
 
   async createPost(user: User, data: CreatePostDto) {
@@ -50,7 +48,7 @@ export class PostService {
       post_url,
     );
 
-    if (data.tags.length > 0) await this.createTag(data.tags, post_id, user.id);
+    if (data.tags.length > 0) await this.createTag(data.tags, post_id);
 
     if (data.series_id) {
       await this.postSeriesRepository.createPostSeries(post_id, data.series_id);
@@ -113,7 +111,7 @@ export class PostService {
 
     if (data.tags.length > 0) {
       await this.postTagRepository.deletePostTag(post_id);
-      await this.createTag(data.tags, post_id, user.id);
+      await this.createTag(data.tags, post_id);
     }
 
     if (!data.series_id) {

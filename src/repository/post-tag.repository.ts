@@ -3,11 +3,8 @@ import { EntityRepository, Repository } from 'typeorm';
 
 @EntityRepository(PostTag)
 export class PostTagRepository extends Repository<PostTag> {
-  async insertPostTag(tag_id: number, post_id: number) {
-    const post_tag = this.create({
-      tag: tag_id,
-      post: post_id,
-    });
+  async insertPostTag(insert_post_tag: any[]) {
+    const post_tag = this.create(insert_post_tag);
 
     await this.save(post_tag);
   }
