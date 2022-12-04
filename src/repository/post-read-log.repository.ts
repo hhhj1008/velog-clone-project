@@ -31,7 +31,7 @@ export class PostReadLogRepository extends Repository<PostReadLog> {
         'post.thumbnail',
         'post.likes',
         'post.comment_count',
-        'DATE_FORMAT(post.create_at, "%Y년 %m월 %d일") AS create_at',
+        'post.create_at AS create_at',
         'user.id AS user_id',
         'user.name',
         'user.profile_image',
