@@ -216,15 +216,18 @@ export class PostRepository extends Repository<Post> {
         break;
       case PeriodType.WEEK:
         main_posts.where(
-          "post.create_at BETWEEN DATE_FORMAT(DATE_SUB(CURDATE(), INTERVAL (DAYOFWEEK(CURDATE())-1) DAY), '%Y/%m/%d')" +
-            "AND DATE_FORMAT(DATE_SUB(CURDATE(), INTERVAL (DAYOFWEEK(CURDATE())-7) DAY), '%Y/%m/%d')",
+          'DATE(post.create_at) BETWEEN DATE_ADD(CURDATE(), INTERVAL -7 DAY) AND CURDATE()',
         );
         break;
       case PeriodType.MONTH:
-        main_posts.where('MONTH(post.create_at) = MONTH(NOW())');
+        main_posts.where(
+          'DATE(post.create_at) BETWEEN DATE_ADD(CURDATE(), INTERVAL -30 DAY) AND CURDATE()',
+        );
         break;
       case PeriodType.YEAR:
-        main_posts.where('WHERE YEAR(post.create_at) = YEAR(NOW())');
+        main_posts.where(
+          'DATE(post.create_at) BETWEEN DATE_ADD(CURDATE(), INTERVAL -365 DAY) AND CURDATE()',
+        );
         break;
     }
 
