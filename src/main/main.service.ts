@@ -17,6 +17,8 @@ export class MainService {
     const posts = await this.postRepository.selectPostListForMain(
       query.type,
       query.period,
+      query.offset,
+      query.limit,
     );
 
     return posts;

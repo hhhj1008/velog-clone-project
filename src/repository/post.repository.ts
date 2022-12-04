@@ -188,7 +188,12 @@ export class PostRepository extends Repository<Post> {
     return pre_post;
   }
 
-  async selectPostListForMain(type: MainPostsType, period: PeriodType) {
+  async selectPostListForMain(
+    type: MainPostsType,
+    period: PeriodType,
+    offset: number,
+    limit: number,
+  ) {
     let main_posts = this.createQueryBuilder('post')
       .leftJoin('post.user', 'user')
       .select([
@@ -233,6 +238,9 @@ export class PostRepository extends Repository<Post> {
         main_posts.orderBy('SUM(post.likes + post.views)', 'DESC');
         break;
     }
+
+    main_posts.offset(offset * limit - limit);
+    main_posts.limit(limit);
 
     return await main_posts.getRawMany();
   }
