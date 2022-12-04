@@ -1,4 +1,3 @@
-import { CreatePostDto } from 'src/dto/post/create-post.dto';
 import { UpdatePostDto } from 'src/dto/post/update-post.dto';
 import { Post } from 'src/entity/post.entity';
 import { User } from 'src/entity/user.entity';
@@ -34,17 +33,17 @@ export class PostRepository extends Repository<Post> {
       .leftJoin('post.tags', 'tags')
       .select([
         'user.id AS user_id',
-        'user.login_id',
-        'user.name',
-        'user.profile_image',
-        'user.about_me',
+        'user.login_id AS login_id',
+        'user.name AS name',
+        'user.profile_image AS profile_image',
+        'user.about_me AS about_me',
         'post.id AS post_id',
-        'post.title',
-        'post.status',
-        'post.content',
-        'post.create_at',
-        'post.comment_count',
-        'post.likes',
+        'post.title AS title',
+        'post.status AS status',
+        'post.content AS content',
+        'post.create_at AS create_at',
+        'post.comment_count AS comment_count',
+        'post.likes AS likes',
         'IF(post.user_id = :userId, 1, 0) AS is_writer',
         'IF(INSTR(tags.tags,\'"tag_id": null\'), null, tags.tags) AS tags',
       ])
@@ -53,10 +52,17 @@ export class PostRepository extends Repository<Post> {
 
     if (login_user_id > -1) {
       query
+        .leftJoin('follow', 'follow', 'follow.followee_id = user.id')
+        .leftJoin(
+          'post_like',
+          'post_like',
+          'post_like.post_id = :post_id AND post_like.user_id = :userId',
+        )
         .addSelect([
-          'EXISTS (SELECT * FROM follow WHERE follow.follower_id = :id AND follow.followee_id = post.user_id) AS IsFollower',
+          'IF(follow.follower_id = :userId, 1, 0) AS is_follower',
+          'IF(post_like.user_id = :userId, 1, 0) AS is_liked',
         ])
-        .setParameter('id', login_user_id);
+        .setParameter('post_id', post_id);
     }
 
     const post = await query.getRawMany();
@@ -114,7 +120,7 @@ export class PostRepository extends Repository<Post> {
         'post.title',
         'post.content',
         'IF(INSTR(tags.tags,\'"tag_id": null\'), null, tags.tags) AS tags',
-        'post.create_at',
+        'post.create_at AS create_at',
         'post.comment_count',
         'post.likes',
         'post.status',
@@ -156,11 +162,11 @@ export class PostRepository extends Repository<Post> {
   async selectNextPost(post_id: number, user_id: number) {
     const next_post = await this.query(
       `SELECT 
-    post.id AS post_id,
-    post.title
-    FROM post
-    WHERE id = (SELECT id FROM post WHERE id > ? ORDER BY id LIMIT 1)
-    AND post.user_id = ?`,
+        post.id AS post_id,
+        post.title
+        FROM post
+        WHERE id = (SELECT id FROM post WHERE id > ? ORDER BY id LIMIT 1)
+        AND post.user_id = ?`,
       [post_id, user_id],
     );
 
@@ -170,22 +176,15 @@ export class PostRepository extends Repository<Post> {
   async selectPrePost(post_id: number, user_id: number) {
     const pre_post = await this.query(
       `SELECT 
-    post.id AS post_id,
-    post.title
-    FROM post
-    WHERE id = (SELECT id FROM post WHERE id < ? ORDER BY id DESC LIMIT 1)
-    AND post.user_id = ?`,
+        post.id AS post_id,
+        post.title
+        FROM post
+        WHERE id = (SELECT id FROM post WHERE id < ? ORDER BY id DESC LIMIT 1)
+        AND post.user_id = ?`,
       [post_id, user_id],
     );
 
     return pre_post;
-  }
-
-  async updateLikeCount(post_id: number) {
-    await this.query(
-      `UPDATE post SET likes = (SELECT COUNT(*) FROM post_like WHERE post_id = ?) WHERE id = ?`,
-      [post_id, post_id],
-    );
   }
 
   async selectPostListForMain(type: string, period: string) {
@@ -199,7 +198,7 @@ export class PostRepository extends Repository<Post> {
         'post.thumbnail',
         'post.title',
         'post.content',
-        'post.create_at',
+        'post.create_at AS create_at',
         'post.comment_count',
         'post.likes',
         'post.views',
@@ -251,7 +250,7 @@ export class PostRepository extends Repository<Post> {
         'post.thumbnail',
         'post.title',
         'post.content',
-        'post.create_at',
+        'post.create_at AS create_at',
         'post.comment_count',
         'post.likes',
         'post.views',
@@ -281,7 +280,7 @@ export class PostRepository extends Repository<Post> {
         'post.thumbnail',
         'post.title',
         'post.content',
-        'post.create_at',
+        'post.create_at AS create_at',
         'post.comment_count',
         'IF(INSTR(tags.tags,\'"tag_id": null\'), null, tags.tags) AS tags',
       ])
@@ -301,9 +300,8 @@ export class PostRepository extends Repository<Post> {
 
     if (user) {
       main_search
-        .addSelect([
-          'EXISTS (SELECT * FROM follow WHERE follow.follower_id = :user_id AND follow.followee_id = post.user_id) AS IsFollower',
-        ])
+        .leftJoin('follow', 'follow', 'follow.followee_id = user.id')
+        .addSelect(['IF(follow.follower_id = :user_id, 1, 0) AS is_follower'])
         .setParameter('user_id', user['sub']);
     }
 
