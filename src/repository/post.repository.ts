@@ -56,11 +56,16 @@ export class PostRepository extends Repository<Post> {
 
     if (login_user_id > -1) {
       query
+        .leftJoin('follow', 'follow', 'follow.followee_id = user.id')
+        .leftJoin(
+          'post_like',
+          'post_like',
+          'post_like.post_id = :post_id AND post_like.user_id = :userId',
+        )
         .addSelect([
-          'EXISTS (SELECT * FROM follow WHERE follow.follower_id = :id AND follow.followee_id = post.user_id) AS is_follower',
-          'EXISTS (SELECT * FROM post_like WHERE post_like.post_id = :post_id AND post_like.user_id = :userId) AS is_liked',
+          'IF(follow.follower_id = :userId, 1, 0) AS is_follower',
+          'IF(post_like.user_id = :userId, 1, 0) AS is_liked',
         ])
-        .setParameter('id', login_user_id)
         .setParameter('post_id', post_id);
     }
 
@@ -309,9 +314,8 @@ export class PostRepository extends Repository<Post> {
 
     if (user) {
       main_search
-        .addSelect([
-          'EXISTS (SELECT * FROM follow WHERE follow.follower_id = :user_id AND follow.followee_id = post.user_id) AS IsFollower',
-        ])
+        .leftJoin('follow', 'follow', 'follow.followee_id = user.id')
+        .addSelect(['IF(follow.follower_id = :user_id, 1, 0) AS is_follower'])
         .setParameter('user_id', user['sub']);
     }
 
