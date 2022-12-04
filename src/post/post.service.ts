@@ -82,7 +82,7 @@ export class PostService {
 
     if (owner_user_id !== login_user_id) {
       const exist = await this.postReadLogRepository.getReadLogBypostId(
-        user['sub'],
+        login_user_id,
         post_id,
       );
 
@@ -120,8 +120,7 @@ export class PostService {
 
   async deletePost(user: User, post_id: number) {
     await this.tagService.deletePostTag(post_id);
-    const delete_post = await this.postRepository.deletePost(user, post_id);
-    return delete_post;
+    await this.postRepository.deletePost(user, post_id);
   }
 
   async selectPostList(
