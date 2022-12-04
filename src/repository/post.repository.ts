@@ -1,4 +1,3 @@
-import { CreatePostDto } from 'src/dto/post/create-post.dto';
 import { UpdatePostDto } from 'src/dto/post/update-post.dto';
 import { Post } from 'src/entity/post.entity';
 import { User } from 'src/entity/user.entity';
@@ -58,9 +57,11 @@ export class PostRepository extends Repository<Post> {
     if (login_user_id > -1) {
       query
         .addSelect([
-          'EXISTS (SELECT * FROM follow WHERE follow.follower_id = :id AND follow.followee_id = post.user_id) AS IsFollower',
+          'EXISTS (SELECT * FROM follow WHERE follow.follower_id = :id AND follow.followee_id = post.user_id) AS is_follower',
+          'EXISTS (SELECT * FROM post_like WHERE post_like.post_id = :post_id AND post_like.user_id = :userId) AS is_liked',
         ])
-        .setParameter('id', login_user_id);
+        .setParameter('id', login_user_id)
+        .setParameter('post_id', post_id);
     }
 
     const post = await query.getRawMany();
@@ -170,11 +171,11 @@ export class PostRepository extends Repository<Post> {
   async selectNextPost(post_id: number, user_id: number) {
     const next_post = await this.query(
       `SELECT 
-    post.id AS post_id,
-    post.title
-    FROM post
-    WHERE id = (SELECT id FROM post WHERE id > ? ORDER BY id LIMIT 1)
-    AND post.user_id = ?`,
+        post.id AS post_id,
+        post.title
+        FROM post
+        WHERE id = (SELECT id FROM post WHERE id > ? ORDER BY id LIMIT 1)
+        AND post.user_id = ?`,
       [post_id, user_id],
     );
 
@@ -184,22 +185,15 @@ export class PostRepository extends Repository<Post> {
   async selectPrePost(post_id: number, user_id: number) {
     const pre_post = await this.query(
       `SELECT 
-    post.id AS post_id,
-    post.title
-    FROM post
-    WHERE id = (SELECT id FROM post WHERE id < ? ORDER BY id DESC LIMIT 1)
-    AND post.user_id = ?`,
+        post.id AS post_id,
+        post.title
+        FROM post
+        WHERE id = (SELECT id FROM post WHERE id < ? ORDER BY id DESC LIMIT 1)
+        AND post.user_id = ?`,
       [post_id, user_id],
     );
 
     return pre_post;
-  }
-
-  async updateLikeCount(post_id: number) {
-    await this.query(
-      `UPDATE post SET likes = (SELECT COUNT(*) FROM post_like WHERE post_id = ?) WHERE id = ?`,
-      [post_id, post_id],
-    );
   }
 
   async selectPostListForMain(type: string, period: string) {
@@ -213,7 +207,7 @@ export class PostRepository extends Repository<Post> {
         'post.thumbnail',
         'post.title',
         'post.content',
-        'post.create_at',
+        'DATE_FORMAT(post.create_at, "%Y년 %m월 %d일") AS create_at',
         'post.comment_count',
         'post.likes',
         'post.views',
@@ -265,7 +259,7 @@ export class PostRepository extends Repository<Post> {
         'post.thumbnail',
         'post.title',
         'post.content',
-        'post.create_at',
+        'DATE_FORMAT(post.create_at, "%Y년 %m월 %d일") AS create_at',
         'post.comment_count',
         'post.likes',
         'post.views',
@@ -295,7 +289,7 @@ export class PostRepository extends Repository<Post> {
         'post.thumbnail',
         'post.title',
         'post.content',
-        'post.create_at',
+        'DATE_FORMAT(post.create_at, "%Y년 %m월 %d일") AS create_at',
         'post.comment_count',
         'IF(INSTR(tags.tags,\'"tag_id": null\'), null, tags.tags) AS tags',
       ])
