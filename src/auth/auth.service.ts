@@ -16,11 +16,13 @@ export class AuthService {
   ) {}
 
   async sendEmail(email: string) {
-    const code: string = Math.round(Math.random() * 10000).toString();
+    const code: string = Math.round(Math.random() * 10000)
+      .toString()
+      .padStart(4, '0');
     this.mailerService
       .sendMail({
         to: email, // List of receivers email address
-        from: 'velog-clone-project@naver.com', // Senders email address
+        from: 'lologproject@gmail.com', // Senders email address
         subject: 'Velog-clone-project signup code ✔', // Subject line
         text: `signup code is : ${code}`, // plaintext body
         html: `signup code is : <b>${code}</b>`, // HTML body content
