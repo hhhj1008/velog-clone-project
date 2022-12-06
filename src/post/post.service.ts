@@ -9,6 +9,7 @@ import { PostReadLogRepository } from 'src/repository/post-read-log.repository';
 import { CommentService } from 'src/comment/comment.service';
 import { TagRepository } from 'src/repository/tag.repository';
 import { PostTagRepository } from 'src/repository/post-tag.repository';
+import { PostViewRepository } from 'src/repository/post-view.repository';
 
 @Injectable()
 export class PostService {
@@ -18,6 +19,7 @@ export class PostService {
     private postReadLogRepository: PostReadLogRepository,
     private tagRepository: TagRepository,
     private postTagRepository: PostTagRepository,
+    private postViewRepository: PostViewRepository,
     private commentService: CommentService,
   ) {}
 
@@ -29,6 +31,22 @@ export class PostService {
     }
 
     const post = await this.postRepository.selectPostOne(login_user_id, post_id);
+
+    var date = new Date();
+
+    var year = date.getFullYear();
+    var month = ('0' + (date.getMonth() + 1)).slice(-2);
+    var day = ('0' + date.getDate()).slice(-2);
+
+    var date_str = year + '-' + month + '-' + day;
+
+    const post_view = await this.postViewRepository.selectPostViewDate(post_id, date_str);
+
+    if (!post_view) {
+      await this.postViewRepository.insertPostView(post_id);
+    } else {
+      await this.postViewRepository.updatePostView(post_id, date_str);
+    }
 
     const owner_user_id = post[0].user_id;
 
