@@ -3,8 +3,8 @@ import { JwtModule } from '@nestjs/jwt';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { PostModule } from 'src/post/post.module';
 import { PostLikeRepository } from 'src/repository/post-like.repository';
+import { UserRepository } from 'src/repository/user.repository';
 import { SeriesModule } from 'src/series/series.module';
-import { UserModule } from 'src/user/user.module';
 import { LologController } from './lolog.controller';
 import { LologService } from './lolog.service';
 
@@ -12,8 +12,7 @@ import { LologService } from './lolog.service';
   imports: [
     PostModule,
     SeriesModule,
-    UserModule,
-    TypeOrmModule.forFeature([PostLikeRepository]),
+    TypeOrmModule.forFeature([PostLikeRepository, UserRepository]),
     JwtModule.register({
       secret: process.env.SECRET_KEY,
     }),

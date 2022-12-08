@@ -29,8 +29,8 @@ export class LologController {
   }
 
   @Get('/:user_id/about')
-  async getAbout(@Param('user_id') user_id: number) {
-    const result = await this.lologService.getAboutBlog(user_id);
+  async getAbout(@Param('user_id') user_id: number, @ValidateToken() user?: User) {
+    const result = await this.lologService.getAboutBlog(user_id, user);
 
     return { statusCode: 200, about: result };
   }
@@ -46,15 +46,10 @@ export class LologController {
     return { statusCode: 200, posts: result.posts, tags: result.tags };
   }
 
-  @Patch('/:user_id/about')
-  async editAboutBlog(
-    @Param('user_id') user_id: number,
-    @Body() data: AboutBlogDto,
-  ) {
-    const result = await this.lologService.editAboutBlog(
-      user_id,
-      data.about_blog,
-    );
+  @Patch('/about')
+  @UseGuards(JwtAuthGuard)
+  async editAboutBlog(@Body() data: AboutBlogDto, @GetUser() user: User) {
+    const result = await this.lologService.editAboutBlog(data.about_blog, user);
 
     return { statusCode: 200, about: result };
   }

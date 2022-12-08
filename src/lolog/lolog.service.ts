@@ -1,20 +1,20 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { PostService } from 'src/post/post.service';
 import { SeriesService } from 'src/series/series.service';
-import { UserService } from 'src/user/user.service';
 import { PostLikeRepository } from 'src/repository/post-like.repository';
 import { PaginationDto } from 'src/dto/pagination.dto';
 import { User } from 'src/entity/user.entity';
 import { PostTagRepository } from 'src/repository/post-tag.repository';
+import { UserRepository } from 'src/repository/user.repository';
 
 @Injectable()
 export class LologService {
   constructor(
     private postService: PostService,
     private seriesService: SeriesService,
-    private userService: UserService,
     private postLikeRepository: PostLikeRepository,
     private postTagRepository: PostTagRepository,
+    private userRepository: UserRepository,
   ) {}
 
   async getLolog(user_id: number, pagination: PaginationDto, user?: User) {
@@ -29,15 +29,20 @@ export class LologService {
     return series;
   }
 
-  async getAboutBlog(user_id: number) {
-    const about = await this.userService.selectAboutBlog(user_id);
+  async getAboutBlog(user_id: number, user?: User) {
+    let login_user_id = -1;
+
+    if (user != null) {
+      login_user_id = user['sub'];
+    }
+    const about = await this.userRepository.selectAboutBlog(user_id, login_user_id);
     return about[0];
   }
 
-  async editAboutBlog(user_id: number, about_blog: string) {
-    await this.userService.updateAboutBlog(user_id, about_blog);
+  async editAboutBlog(about_blog: string, user: User) {
+    await this.userRepository.updateAboutBlog(user.id, about_blog);
 
-    return await this.getAboutBlog(user_id);
+    return await this.getAboutBlog(user.id);
   }
 
   async likePost(user_id: number, post_id: number) {
