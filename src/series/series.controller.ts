@@ -37,13 +37,20 @@ export class SeriesController {
     return { statusCode: 200, series: result };
   }
 
-  @Get('/:id')
+  @Get('/posts/:id')
   async SelectSereisPosts(
     @Param('id') series_id: number,
     @Query() sort: SelectSereisPostsDto,
     @ValidateToken() user?: User,
   ) {
     const result = await this.seriesService.SelectSereisPosts(series_id, sort, user);
+
+    return { statusCode: 200, series: result };
+  }
+
+  @Get('/:user_id')
+  async getSeries(@Param('user_id') user_id: number) {
+    const result = await this.seriesService.selectSeriesList(user_id);
 
     return { statusCode: 200, series: result };
   }

@@ -10,13 +10,6 @@ import { PaginationDto } from 'src/dto/pagination.dto';
 export class LologController {
   constructor(private readonly lologService: LologService) {}
 
-  @Get('/:user_id/series')
-  async getSeries(@Param('user_id') user_id: number) {
-    const result = await this.lologService.getSeries(user_id);
-
-    return { statusCode: 200, series: result };
-  }
-
   @Get('/:user_id')
   async getLolog(
     @Param('user_id') user_id: number,
