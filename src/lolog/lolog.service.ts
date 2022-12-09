@@ -1,18 +1,18 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { PostService } from 'src/post/post.service';
-import { SeriesService } from 'src/series/series.service';
 import { PostLikeRepository } from 'src/repository/post-like.repository';
 import { PaginationDto } from 'src/dto/pagination.dto';
 import { User } from 'src/entity/user.entity';
 import { PostTagRepository } from 'src/repository/post-tag.repository';
+import { SeriesRepository } from 'src/repository/series.repository';
 
 @Injectable()
 export class LologService {
   constructor(
     private postService: PostService,
-    private seriesService: SeriesService,
     private postLikeRepository: PostLikeRepository,
     private postTagRepository: PostTagRepository,
+    private seriesRepository: SeriesRepository,
   ) {}
 
   async getLolog(user_id: number, pagination: PaginationDto, user?: User) {
@@ -23,7 +23,7 @@ export class LologService {
   }
 
   async getSeries(user_id: number) {
-    const series = await this.seriesService.selectSeriesList(user_id);
+    const series = await this.seriesRepository.selectSeriesList(user_id);
     return series;
   }
 

@@ -24,10 +24,7 @@ export class SeriesController {
   @Post('')
   @UseGuards(JwtAuthGuard)
   async createSeries(@GetUser() user: User, @Body() data: CreateSeriesDto) {
-    const result = await this.seriesService.createSeries(
-      user.id,
-      data.series_name,
-    );
+    const result = await this.seriesService.createSeries(user.id, data.series_name);
 
     return { statusCode: 200, series: result };
   }
@@ -46,20 +43,13 @@ export class SeriesController {
     @Query() sort: SelectSereisPostsDto,
     @ValidateToken() user?: User,
   ) {
-    const result = await this.seriesService.SelectSereisPosts(
-      series_id,
-      sort,
-      user,
-    );
+    const result = await this.seriesService.SelectSereisPosts(series_id, sort, user);
 
     return { statusCode: 200, series: result };
   }
 
   @Patch('/:id')
-  async updatePostSeriesSort(
-    @Param('id') series_id: number,
-    @Body('sort') sort,
-  ) {
+  async updatePostSeriesSort(@Param('id') series_id: number, @Body('sort') sort) {
     await this.seriesService.updatePostSeriesSort(series_id, sort);
 
     return { statusCode: 200, message: 'seires update success' };
