@@ -14,7 +14,7 @@ export class SeriesRepository extends Repository<Series> {
         'series.thumbnail',
         'series.series_name',
         'series.post_count',
-        'series.create_at',
+        'series.update_at',
       ])
       .groupBy('series.id')
       .orderBy('series.create_at', 'ASC');
