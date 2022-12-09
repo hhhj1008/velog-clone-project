@@ -5,7 +5,6 @@ import { PostLikeRepository } from 'src/repository/post-like.repository';
 import { PaginationDto } from 'src/dto/pagination.dto';
 import { User } from 'src/entity/user.entity';
 import { PostTagRepository } from 'src/repository/post-tag.repository';
-import { UserRepository } from 'src/repository/user.repository';
 
 @Injectable()
 export class LologService {
@@ -14,7 +13,6 @@ export class LologService {
     private seriesService: SeriesService,
     private postLikeRepository: PostLikeRepository,
     private postTagRepository: PostTagRepository,
-    private userRepository: UserRepository,
   ) {}
 
   async getLolog(user_id: number, pagination: PaginationDto, user?: User) {
@@ -27,22 +25,6 @@ export class LologService {
   async getSeries(user_id: number) {
     const series = await this.seriesService.selectSeriesList(user_id);
     return series;
-  }
-
-  async getAboutBlog(user_id: number, user?: User) {
-    let login_user_id = -1;
-
-    if (user != null) {
-      login_user_id = user['sub'];
-    }
-    const about = await this.userRepository.selectAboutBlog(user_id, login_user_id);
-    return about[0];
-  }
-
-  async editAboutBlog(about_blog: string, user: User) {
-    await this.userRepository.updateAboutBlog(user.id, about_blog);
-
-    return await this.getAboutBlog(user.id);
   }
 
   async likePost(user_id: number, post_id: number) {

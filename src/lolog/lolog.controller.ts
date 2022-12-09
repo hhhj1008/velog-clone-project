@@ -1,17 +1,6 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  Patch,
-  Post,
-  Query,
-  UseGuards,
-} from '@nestjs/common';
+import { Controller, Delete, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
 import { ValidateToken } from 'src/custom-decorator/validate-token.decorator';
 import { User } from 'src/entity/user.entity';
-import { AboutBlogDto } from 'src/dto/user/about-blog.dto';
 import { LologService } from './lolog.service';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { GetUser } from 'src/custom-decorator/get-user.decorator';
@@ -28,13 +17,6 @@ export class LologController {
     return { statusCode: 200, series: result };
   }
 
-  @Get('/:user_id/about')
-  async getAbout(@Param('user_id') user_id: number, @ValidateToken() user?: User) {
-    const result = await this.lologService.getAboutBlog(user_id, user);
-
-    return { statusCode: 200, about: result };
-  }
-
   @Get('/:user_id')
   async getLolog(
     @Param('user_id') user_id: number,
@@ -44,14 +26,6 @@ export class LologController {
     const result = await this.lologService.getLolog(user_id, pagination, user);
 
     return { statusCode: 200, posts: result.posts, tags: result.tags };
-  }
-
-  @Patch('/about')
-  @UseGuards(JwtAuthGuard)
-  async editAboutBlog(@Body() data: AboutBlogDto, @GetUser() user: User) {
-    const result = await this.lologService.editAboutBlog(data.about_blog, user);
-
-    return { statusCode: 200, about: result };
   }
 
   @Post('/:post_id/like')
