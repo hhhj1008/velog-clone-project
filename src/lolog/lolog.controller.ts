@@ -18,7 +18,7 @@ export class LologController {
   ) {
     const result = await this.lologService.getLolog(user_id, pagination, user);
 
-    return { statusCode: 200, posts: result.posts, tags: result.tags };
+    return { statusCode: 200, user: result.user, posts: result.posts, tags: result.tags };
   }
 
   @Post('/:post_id/like')
