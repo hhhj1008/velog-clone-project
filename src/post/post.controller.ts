@@ -76,14 +76,14 @@ export class PostController {
   @Post('/:id/like')
   @UseGuards(JwtAuthGuard)
   async likePost(@Param('id') post_id: number, @GetUser() user: User) {
-    await this.postService.likePost(user['sub'], post_id);
+    await this.postService.likePost(user.id, post_id);
     return { statusCode: 201 };
   }
 
   @Delete('/:id/like')
   @UseGuards(JwtAuthGuard)
   async unlikePost(@Param('id') post_id: number, @GetUser() user: User) {
-    await this.postService.unlikePost(user['sub'], post_id);
+    await this.postService.unlikePost(user.id, post_id);
     return { statusCode: 204 };
   }
 }

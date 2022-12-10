@@ -8,7 +8,12 @@ export const ValidateToken = createParamDecorator((_data, ctx: ExecutionContext)
 
   if (auth_index !== -1) {
     const token = rawHeaders[auth_index + 1].replace('Bearer ', '');
-    const user = jwt.verify(token, process.env.SECRET_KEY)['user'];
+    let user = jwt.verify(token, process.env.SECRET_KEY)['user'];
+    user = {
+      id: user['sub'],
+      login_id: user['login_id'],
+      name: user['name'],
+    };
     return user;
   }
   return null;

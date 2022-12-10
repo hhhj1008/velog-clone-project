@@ -31,7 +31,12 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     const secretKey = process.env.SECRET_KEY;
 
     try {
-      const verify = jwt.verify(token, secretKey)['user'];
+      let verify = jwt.verify(token, secretKey)['user'];
+      verify = {
+        id: verify['sub'],
+        login_id: verify['login_id'],
+        name: verify['name'],
+      };
       return verify;
     } catch (e) {
       switch (e.message) {
