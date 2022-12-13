@@ -28,7 +28,7 @@ export class PostService {
     let login_user_id = -1;
 
     if (user != null) {
-      login_user_id = user['sub'];
+      login_user_id = user.id;
     }
     const post = await this.postRepository.selectPostOne(login_user_id, post_id);
 

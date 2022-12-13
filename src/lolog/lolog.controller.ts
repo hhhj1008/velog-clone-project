@@ -14,6 +14,7 @@ export class LologController {
     @Query() pagination: PaginationDto,
     @ValidateToken() user?: User,
   ) {
+    // 겟미에 is_follower 보내기
     const result = await this.lologService.getLolog(user_id, pagination, user);
 
     return { statusCode: 200, user: result.user, posts: result.posts, tags: result.tags };

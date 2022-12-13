@@ -302,7 +302,7 @@ export class PostRepository extends Repository<Post> {
       main_search
         .leftJoin('follow', 'follow', 'follow.followee_id = user.id')
         .addSelect(['IF(follow.follower_id = :user_id, 1, 0) AS is_follower'])
-        .setParameter('user_id', user['sub']);
+        .setParameter('user_id', user.id);
     }
 
     main_search.offset(offset * limit - limit);

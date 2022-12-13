@@ -17,7 +17,7 @@ export class LologService {
     let login_user_id = -1;
 
     if (user != null) {
-      login_user_id = user['sub'];
+      login_user_id = user.id;
     }
 
     let is_owner = false;
@@ -26,7 +26,7 @@ export class LologService {
       is_owner = true;
     }
 
-    const get_me = await this.userRepository.getMe(user_id);
+    const get_me = await this.userRepository.getMe(user_id, login_user_id);
     let posts = await this.postRepository.selectPostList(user_id, is_owner, pagination);
     const tags = await this.postTagRepository.selectTagListByUserId(user_id);
 
@@ -42,6 +42,6 @@ export class LologService {
       posts = null;
     }
 
-    return { user: get_me[0], posts, tags };
+    return { user: get_me, posts, tags };
   }
 }
