@@ -24,7 +24,6 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     }
 
     const token = rawHeaders[authIndex + 1].replace('Bearer ', '');
-    console.log(token);
     if (!token) {
       throw new UnauthorizedException('Token 전송 안됨');
     }
@@ -36,7 +35,6 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     const secretKey = process.env.SECRET_KEY;
 
     try {
-      console.log(token);
       let verify = jwt.verify(token, secretKey)['user'];
       verify = {
         id: verify['sub'],

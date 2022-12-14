@@ -108,17 +108,6 @@ export class UserRepository extends Repository<User> {
         .setParameter('user_id', login_user_id);
     }
     return await getMe.getRawOne();
-    // return await this.query(
-    //   `
-    //   SELECT count(follow.id) as follow_count, u.id, u.profile_image, u.name, u.about_me, u.title, u.email, u.comment_alert, u.update_alert,
-    //   si.email social_info_email, si.github social_info_github, si. twitter social_info_twitter, si.facebook social_info_facebook, si.url social_info_url
-    //     FROM user u
-    //     LEFT JOIN social_info si ON si.userId = u.id
-    //     LEFT JOIN follow ON u.id = follow.followee_id
-    //     WHERE u.id = ?;
-    //   `,
-    //   [id],
-    // );
   }
 
   async updateAboutBlog(user_id: number, about_blog: string) {

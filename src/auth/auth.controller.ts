@@ -134,14 +134,14 @@ export class AuthController {
   }
 
   @Get('/github/callback')
-  @UseGuards(GithubStrategy)
+  @UseGuards(GithubAuthGuard)
   async githubAuthRedirect(@Request() req) {
     const data = await this.authService.githubLogin(req.user);
     return data;
   }
 
   @Get('/github')
-  @UseGuards(GithubStrategy)
+  @UseGuards(GithubAuthGuard)
   async githubAuth(@Request() req) {
     return HttpStatus.OK;
   }
