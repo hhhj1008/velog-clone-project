@@ -38,6 +38,7 @@ export class PostRepository extends Repository<Post> {
         'post.title AS title',
         'post.status AS status',
         'post.content AS content',
+        'post.thumbnail AS thumbnail',
         'post.create_at AS create_at',
         'post.comment_count AS comment_count',
         'post.likes AS likes',
@@ -47,7 +48,8 @@ export class PostRepository extends Repository<Post> {
         'post.description as description',
       ])
       .setParameter('userId', login_user_id)
-      .andWhere('post.id = :post_id', { post_id: post_id });
+      .where('post.id = :post_id', { post_id: post_id })
+      .andWhere("post.status REGEXP '1|2'");
 
     if (login_user_id > -1) {
       query
@@ -120,7 +122,9 @@ export class PostRepository extends Repository<Post> {
         'post.comment_count',
         'post.likes',
         'post.status',
+        'IF(:is_owner, 1, 0) AS is_owner',
       ])
+      .setParameter('is_owner', is_owner)
       .groupBy('post.id')
       .orderBy('post.create_at', 'DESC');
 
@@ -243,16 +247,16 @@ export class PostRepository extends Repository<Post> {
     return await main_posts.getRawMany();
   }
 
-  async interestedPostList() {
+  async interestedPostList(post_id: number) {
     const posts = this.createQueryBuilder('post')
       .leftJoin('post.user', 'user')
       .leftJoin('post.post_tag', 'post_tag')
       .leftJoin('tag', 'tag', 'post_tag.tag_id = tag.id')
       .select([
+        'post.id AS post_id',
         'user.id AS user_id',
         'user.profile_image',
         'user.login_id',
-        'post.id AS post_id',
         'post.thumbnail',
         'post.title',
         'post.description',
@@ -261,6 +265,8 @@ export class PostRepository extends Repository<Post> {
         'post.likes',
         'post.views',
       ])
+      .distinct(true)
+      .where('post.id <> :post_id', { post_id: post_id })
       .orderBy('RAND()')
       .limit(12);
     return await posts.getRawMany();
@@ -309,5 +315,22 @@ export class PostRepository extends Repository<Post> {
     main_search.limit(limit);
 
     return await main_search.getRawMany();
+  }
+
+  async selectSaveOne(post_id: number, user_id: number) {
+    let save_one = this.createQueryBuilder('post')
+      .leftJoin('post.tags', 'tags')
+      .select([
+        'post.id AS post_id',
+        'post.user_id AS user_id',
+        'post.title AS title',
+        'post.content AS content',
+        'IF(INSTR(tags.tags,\'"tag_id": null\'), null, tags.tags) AS tags',
+      ])
+      .where('post.user_id = :user_id', { user_id: user_id })
+      .andWhere('post.id = :post_id', { post_id: post_id })
+      .orderBy('post.create_at', 'DESC');
+
+    return await save_one.getRawMany();
   }
 }
